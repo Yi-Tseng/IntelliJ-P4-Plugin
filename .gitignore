@@ -26,3 +26,5 @@ hs_err_pid*
 
 # Generate by JFlex
 *.java~
+idea-flex.skeleton
+
