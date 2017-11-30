@@ -20,14 +20,16 @@ import com.intellij.psi.tree.IElementType;
 
 %%
 
-[ \t\r]+        { yybegin(NORMAL); return P4TokenTypes.WHITE_SPACE; }
-[\n]            { yybegin(YYINITIAL); return P4TokenTypes.WHITE_SPACE; }
-"//".*          { yybegin(NORMAL); return P4TokenTypes.COMMENT; }
+
 
 "/*"            { yybegin(COMMENT); }
 <COMMENT>"*/"   { yybegin(NORMAL); return P4TokenTypes.COMMENT; }
 <COMMENT>.      { yybegin(COMMENT); }
 <COMMENT>[\n]   { yybegin(COMMENT); }
+
+[ \t\r]+        { yybegin(NORMAL); return P4TokenTypes.WHITE_SPACE; }
+[\n]            { yybegin(NORMAL); return P4TokenTypes.WHITE_SPACE; }
+"//".*          { yybegin(NORMAL); return P4TokenTypes.COMMENT; }
 
 <COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); }
 
