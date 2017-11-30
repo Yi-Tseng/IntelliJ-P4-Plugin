@@ -28,3 +28,4 @@ hs_err_pid*
 *.java~
 idea-flex.skeleton
 
+out/*
