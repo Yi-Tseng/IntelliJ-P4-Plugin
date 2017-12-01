@@ -15,10 +15,9 @@ import com.intellij.psi.TokenType;
 %function advance
 %type IElementType
 
-%state COMMENT
-%state NORMAL
-%state STRING
-
+%x COMMENT STRING
+%x LINE1 LINE2 LINE3
+%s NORMAL
 %{
 
 private void blockComment() {
@@ -50,20 +49,30 @@ private void blockComment() {
 
 %%
 
-
-"/*"                 { blockComment(); return P4LangTypes.COMMENT; }
-
-[ \t\r]+        { yybegin(NORMAL); return TokenType.WHITE_SPACE; }
-[\n]            { yybegin(NORMAL); return TokenType.WHITE_SPACE; }
-"//".*          { yybegin(NORMAL); return P4LangTypes.COMMENT; }
-
-<COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); }
+[ \t\r]+        { return TokenType.WHITE_SPACE; }
+[\n]            { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+"//".*          { return P4LangTypes.COMMENT; }
+"/*"            { blockComment(); return P4LangTypes.COMMENT; }
 
 
-\"(\\.|[^\"])*\" {return P4LangTypes.STRING_LITERAL; }
+<YYINITIAL>"#line"      { yybegin(LINE1); }
+<YYINITIAL>"# "         { yybegin(LINE1); }
+<YYINITIAL>[ \t]*"#"    { yybegin(LINE3); }
+<LINE1>[0-9]+         { yybegin(LINE2); }
+<LINE2>\"[^\"]*       { yybegin(LINE3); }
+<LINE1,LINE2>[ \t]      {}
+<LINE1,LINE2>.        { yybegin(LINE3); }
+<LINE3>.                {}
+<LINE1,LINE2,LINE3>\n { yybegin(YYINITIAL); }
+<LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); }
 
+\"              { yybegin(STRING); }
+<STRING>\\\"    {  }
+<STRING>\\\\    {  }
+<STRING>\"      { yybegin(YYINITIAL); return P4LangTypes.STRING_LITERAL; }
+<STRING>.       {  }
+<STRING>\n      {  }
 
-"#"\w+          { yybegin(NORMAL); return P4LangTypes.PRE_PROCESS; }
 "abstract"      { yybegin(NORMAL); return P4LangTypes.ABSTRACT; }
 "action"        { yybegin(NORMAL); return P4LangTypes.ACTION; }
 "actions"       { yybegin(NORMAL); return P4LangTypes.ACTIONS; }
@@ -108,28 +117,77 @@ private void blockComment() {
 [A-Za-z_][A-Za-z0-9_]* {
                   yybegin(NORMAL);
                   return P4LangTypes.IDENTIFIER;
-                  /* FIXME: this might be a type*/ }
+                }
+
 0[xX][0-9a-fA-F_]+ { yybegin(NORMAL);
                      return P4LangTypes.INTEGER; }
 0[dD][0-9_]+       { yybegin(NORMAL);
+                     
                      return P4LangTypes.INTEGER; }
 0[oO][0-7_]+       { yybegin(NORMAL);
+                     
                      return P4LangTypes.INTEGER; }
 0[bB][01_]+        { yybegin(NORMAL);
+                     
                      return P4LangTypes.INTEGER; }
 [0-9][0-9_]*       { yybegin(NORMAL);
+                     
                      return P4LangTypes.INTEGER; }
 
 [0-9]+[ws]0[xX][0-9a-fA-F_]+ { yybegin(NORMAL);
+                               
                                return P4LangTypes.INTEGER; }
 [0-9]+[ws]0[dD][0-9_]+  { yybegin(NORMAL);
+                          
                           return P4LangTypes.INTEGER; }
 [0-9]+[ws]0[oO][0-7_]+  { yybegin(NORMAL);
+                          
                           return P4LangTypes.INTEGER; }
 [0-9]+[ws]0[bB][01_]+   { yybegin(NORMAL);
+                          
                           return P4LangTypes.INTEGER; }
 [0-9]+[ws][0-9_]+       { yybegin(NORMAL);
+                          
                           return P4LangTypes.INTEGER; }
 
-.              { return TokenType.BAD_CHARACTER; }
-[^]            { return TokenType.BAD_CHARACTER; }
+"&&&"           { yybegin(NORMAL); return P4LangTypes.MASK; }
+".."            { yybegin(NORMAL); return P4LangTypes.RANGE; }
+"<<"            { yybegin(NORMAL); return P4LangTypes.SHL; }
+"&&"            { yybegin(NORMAL); return P4LangTypes.AND; }
+"||"            { yybegin(NORMAL); return P4LangTypes.OR; }
+"=="            { yybegin(NORMAL); return P4LangTypes.EQ; }
+"!="            { yybegin(NORMAL); return P4LangTypes.NE; }
+">="            { yybegin(NORMAL); return P4LangTypes.GE; }
+"<="            { yybegin(NORMAL); return P4LangTypes.LE; }
+"++"            { yybegin(NORMAL); return P4LangTypes.PP; }
+
+"+"            { yybegin(NORMAL); return P4LangTypes.PLUS; }
+"-"            { yybegin(NORMAL); return P4LangTypes.MINUS; }
+"*"            { yybegin(NORMAL); return P4LangTypes.MUL; }
+"/"            { yybegin(NORMAL); return P4LangTypes.DIV; }
+"%"            { yybegin(NORMAL); return P4LangTypes.MOD; }
+
+"|"            { yybegin(NORMAL); return P4LangTypes.BIT_OR; }
+"&"            { yybegin(NORMAL); return P4LangTypes.BIT_AND; }
+"^"            { yybegin(NORMAL); return P4LangTypes.BIT_XOR; }
+"~"            { yybegin(NORMAL); return P4LangTypes.COMPLEMENT; }
+
+"("            { yybegin(NORMAL); return P4LangTypes.L_PAREN; }
+")"            { yybegin(NORMAL); return P4LangTypes.R_PAREN; }
+"["            { yybegin(NORMAL); return P4LangTypes.L_BRACKET; }
+"]"            { yybegin(NORMAL); return P4LangTypes.R_BRACKET; }
+"{"            { yybegin(NORMAL); return P4LangTypes.L_BRACE; }
+"}"            { yybegin(NORMAL); return P4LangTypes.R_BRACE; }
+"<"            { yybegin(NORMAL); return P4LangTypes.L_ANGLE; }
+">"            { yybegin(NORMAL); return P4LangTypes.R_ANGLE; }
+
+"!"            { yybegin(NORMAL); return P4LangTypes.NOT; }
+":"            { yybegin(NORMAL); return P4LangTypes.COLON; }
+","            { yybegin(NORMAL); return P4LangTypes.COMMA; }
+"?"            { yybegin(NORMAL); return P4LangTypes.QUESTION; }
+"."            { yybegin(NORMAL); return P4LangTypes.DOT; }
+"="            { yybegin(NORMAL); return P4LangTypes.ASSIGN; }
+";"            { yybegin(NORMAL); return P4LangTypes.SEMICOLON; }
+"@"            { yybegin(NORMAL); return P4LangTypes.AT; }
+
+.              { return P4LangTypes.UNEXPECTED_TOKEN; }

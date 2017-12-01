@@ -1,28 +1,39 @@
 {
   parserClass="org.p4.p4plugin.parser.P4LangParser"
-
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
-
   psiClassPrefix="P4Lang"
   psiImplClassSuffix="Impl"
   psiPackage="org.p4.p4plugin.psi"
   psiImplPackage="org.p4.p4plugin.psi.impl"
-
   elementTypeHolderClass="org.p4.p4plugin.psi.P4LangTypes"
   elementTypeClass="org.p4.p4plugin.psi.P4LangElementType"
   tokenTypeClass="org.p4.p4plugin.psi.P4LangTokenType"
 }
 
-private item_ ::= (program|COMMENT|DONTCARE|PRE_PROCESS)
+tokens ::= [
+    END UNEXPECTED_TOKEN COMMENT
+    LE GE
+    SHL AND OR NOT
+    NE EQ
+    PLUS MINUS MUL DIV MOD
+    BIT_OR BIT_AND BIT_XOR COMPLEMENT
+    L_BRACKET R_BRACKET L_BRACE R_BRACE L_ANGLE R_ANGLE L_PAREN R_PAREN
+    COLON COMMA QUESTION DOT ASSIGN SEMICOLON AT
+    PP DONTCARE MASK RANGE TRUE FALSE THIS
+    ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST
+    CONTROL DATA DEFAULT ELSE ENTRIES ENUM ERROR
+    EXIT EXTERN HEADER HEADER_UNION IF IN
+    INOUT INT KEY SELECT MATCH_KIND OUT
+    PACKAGE PARSER RETURN STATE STRUCT SWITCH TABLE TRANSITION
+    TUPLE TYPEDEF VARBIT VOID IDENTIFIER TYPE STRING_LITERAL INTEGER
+]
 
-program ::= input END
-
+program ::= input END ;
 input ::=
-      input declaration
-    | input ";"
-    | /* epsilon */
+      /* epsilon */
+    | input declaration
+    | input ";"    // empty declaration
     ;
-
 declaration ::=
       constantDeclaration
     | externDeclaration
@@ -34,7 +45,6 @@ declaration ::=
     | errorDeclaration
     | matchKindDeclaration
     ;
-
 nonTypeName ::=
       IDENTIFIER
     | APPLY
@@ -43,388 +53,334 @@ nonTypeName ::=
     | STATE
     | ENTRIES
     ;
-
 p4ItemName ::=
-      nonTypeName
+     nonTypeName
     | TYPE
     ;
-
 optCONST ::=
-      CONST
-    | /* empty */
+     /* empty */
+    | CONST
     ;
-
 optAnnotations ::=
-      annotations
-    | /* empty */
+     /* empty */
+    | annotations
     ;
-
 annotations ::=
-      annotation
+     annotation
     | annotations annotation
     ;
-
 annotation ::=
-      "@" p4ItemName
-    | "@" p4ItemName "(" expressionListt ")"
+     "@" p4ItemName
+    | "@" p4ItemName "(" expressionArray ")"
     ;
-
-parameterListt ::=
-      nonEmptyParameterListt
-    | /* empty */
+parameterArray ::=
+     /* empty */
+    | nonEmptyParameterArray
     ;
-
-nonEmptyParameterListt ::=
-      parameter
-    | nonEmptyParameterListt "," parameter
+nonEmptyParameterArray ::=
+     parameter
+    | nonEmptyParameterArray "," parameter
     ;
-
-parameter ::= optAnnotations direction typeRef p4ItemName ;
-
+parameter ::=
+     optAnnotations direction typeRef p4ItemName
+    ;
 direction ::=
-      IN
+     IN
     | OUT
     | INOUT
     | /* empty */
     ;
-
-packageTypeDeclaration ::= optAnnotations PACKAGE p4ItemName optTypeParameters "(" parameterListt ")" ;
-
+packageTypeDeclaration ::=
+     optAnnotations PACKAGE p4ItemName
+      optTypeParameters
+      "(" parameterArray ")"
+    ;
 instantiation ::=
-        annotations typeRef "(" argumentListt ")" p4ItemName ";"
-      | typeRef "(" argumentListt ")" p4ItemName ";"
+        annotations typeRef "(" argumentArray ")" p4ItemName ";"
+      | typeRef "(" argumentArray ")" p4ItemName ";"
       /* experimental */
-      | annotations typeRef "(" argumentListt ")" p4ItemName "=" objInitializer ";"
+      | annotations typeRef "(" argumentArray ")" p4ItemName "=" objInitializer ";"
       /* experimental */
-      | typeRef "(" argumentListt ")" p4ItemName "=" objInitializer ";"
+      | typeRef "(" argumentArray ")" p4ItemName "=" objInitializer ";"
     ;
-
 /* experimental; includes the following 3 productions */
-objInitializer ::= "{" objDeclarations "}" ;
-
-objDeclarations ::=
-    objDeclarations objDeclaration
-    | /* empty */
+objInitializer ::=
+     "{" objDeclarations "}"
     ;
-
+objDeclarations ::=
+     /* empty */
+    | objDeclarations objDeclaration
+    ;
 objDeclaration ::=
-      functionDeclaration
+     functionDeclaration
     | instantiation
     ;
-
 optConstructorParameters ::=
-      "(" parameterListt ")"
-    | /* empty */
+     /* empty */
+    | "(" parameterArray ")"
     ;
-
 dotPrefix ::=
-      "."
+     "."
     ;
-
 /**************************** PARSER ******************************/
-
 parserDeclaration ::=
-    parserTypeDeclaration optConstructorParameters "{" parserLocalElements parserStates "}"
+     parserTypeDeclaration optConstructorParameters
+      "{" parserLocalElements parserStates "}"
     ;
-
-parserLocalElements ::= parserLocalElements parserLocalElement
-
+parserLocalElements ::=
+     /* empty */
+    | parserLocalElements parserLocalElement
     ;
-
 parserLocalElement ::=
-      constantDeclaration
+     constantDeclaration
     | instantiation
     | variableDeclaration
-    | /* empty */
     ;
-
-parserTypeDeclaration ::= optAnnotations PARSER p4ItemName optTypeParameters "(" parameterListt ")" ;
-
+parserTypeDeclaration ::=
+     optAnnotations
+        PARSER p4ItemName
+        optTypeParameters
+        "(" parameterArray ")"
+    ;
 parserStates ::=
-      parserState
+     parserState
     | parserStates parserState
     ;
-
-parserState ::= optAnnotations STATE p4ItemName "{" parserStatements transitionStatement "}" ;
-
-parserStatements ::= parserStatements parserStatement ;
-
+parserState ::=
+     optAnnotations STATE p4ItemName
+      "{" parserStatements transitionStatement "}"
+    ;
+parserStatements ::=
+     /* empty */
+    | parserStatements parserStatement
+    ;
 parserStatement ::=
-      assignmentOrMethodCallStatement
+     assignmentOrMethodCallStatement
     | directApplication
     | variableDeclaration
     | constantDeclaration
     | parserBlockStatement
-    | /* empty */
     ;
-
-parserBlockStatement ::= optAnnotations "{" parserStatements "}" ;
-
+parserBlockStatement ::=
+     optAnnotations "{" parserStatements "}"
+    ;
 transitionStatement ::=
-      TRANSITION stateExpression
-    | /* empty */
+     /* empty */
+    | TRANSITION stateExpression
     ;
-
 stateExpression ::=
-      p4ItemName ";"
+     p4ItemName ";"
     | selectExpression
     ;
-
 selectExpression ::=
-      SELECT "(" expressionListt ")" "{" selectCaseListt "}"
+     SELECT "(" expressionArray ")" "{" selectCaseArray "}"
     ;
-
-selectCaseListt ::=
-      selectCaseListt selectCase
-    | selectCase
+selectCaseArray ::=
+     /* empty */
+    | selectCaseArray selectCase
     ;
-
 selectCase ::=
-      keysetExpression ":" p4ItemName ";"
-    | /* empty */
+     keysetExpression ":" p4ItemName ";"
     ;
-
 keysetExpression ::=
-      tupleKeysetExpression
+     tupleKeysetExpression
     | simpleKeysetExpression
     ;
-
-tupleKeysetExpression ::=
-      /* at least two elements in the tuple */
-      "(" simpleKeysetExpression "," simpleExpressionListt ")"
+tupleKeysetExpression
+    /* at least two elements in the tuple */ ::=
+     "(" simpleKeysetExpression "," simpleExpressionArray ")"
     ;
-
-simpleExpressionListt ::=
-      simpleKeysetExpression
-    | simpleExpressionListt "," simpleKeysetExpression
+simpleExpressionArray ::=
+     simpleKeysetExpression
+    | simpleExpressionArray "," simpleKeysetExpression
     ;
-
 simpleKeysetExpression ::=
-      expression
+     expression
     | expression "&&&" expression
     | expression ".." expression
     | DEFAULT
     | "_"
     ;
-
 /*************************** CONTROL ************************/
-
 controlDeclaration ::=
-      controlTypeDeclaration optConstructorParameters
+     controlTypeDeclaration optConstructorParameters
       "{" controlLocalDeclarations APPLY controlBody "}"
     ;
-
 controlTypeDeclaration ::=
-      optAnnotations CONTROL p4ItemName optTypeParameters "(" parameterListt ")"
+     optAnnotations
+        CONTROL p4ItemName
+        optTypeParameters
+        "(" parameterArray ")"
     ;
-
 controlLocalDeclarations ::=
-      /* empty */
+     /* empty */
     | controlLocalDeclarations controlLocalDeclaration
     ;
-
 controlLocalDeclaration ::=
-      constantDeclaration
+     constantDeclaration
     | actionDeclaration
     | tableDeclaration
     | instantiation
     | variableDeclaration
     ;
-
-controlBody ::= blockStatement ;
-
+controlBody ::=
+     blockStatement
+    ;
 /*************************** EXTERN *************************/
-
 externDeclaration ::=
-      optAnnotations EXTERN nonTypeName optTypeParameters "{" methodPrototypes "}"
+     optAnnotations
+        EXTERN nonTypeName
+        optTypeParameters
+        "{" methodPrototypes "}"
     | optAnnotations EXTERN functionPrototype ";"
     | optAnnotations EXTERN p4ItemName ";"
     ;
-
 methodPrototypes ::=
-      /* empty */
+     /* empty */
     | methodPrototypes methodPrototype
     ;
-
-functionPrototype ::= typeOrVoid p4ItemName optTypeParameters "(" parameterListt ")" ;
-
-methodPrototype ::=
-      optAnnotations functionPrototype ";"
-    | optAnnotations ABSTRACT functionPrototype ";"
-    | optAnnotations TYPE "(" parameterListt ")" ";"  // constructor
+functionPrototype ::=
+     typeOrVoid
+        p4ItemName optTypeParameters
+        "(" parameterArray ")"
     ;
-
+methodPrototype ::=
+     optAnnotations functionPrototype ";"
+    | optAnnotations ABSTRACT functionPrototype ";"     // experimental
+    | optAnnotations TYPE "(" parameterArray ")" ";"  // constructor
+    ;
 /************************** TYPES ****************************/
-
 typeRef ::=
-      baseType
+     baseType
     | typeName
     | specializedType
     | headerStackType
     | tupleType
     ;
-
 prefixedType ::=
-      TYPE
+     TYPE
     | dotPrefix TYPE
     ;
-
 typeName ::=
-      prefixedType
+     prefixedType
     ;
-
-
 tupleType ::=
-      TUPLE "<" typeArgumentListt ">"
+     TUPLE "<" typeArgumentArray ">"
     ;
-
 headerStackType ::=
-      typeName "[" expression "]"
+     typeName "[" expression "]"
     ;
-
 specializedType ::=
-      typeName "<" typeArgumentListt ">"
+     typeName "<" typeArgumentArray ">"
     ;
-
 baseType ::=
-      BOOL
+     BOOL
     | ERROR
     | BIT
     | BIT "<" INTEGER ">"
-
     | INT "<" INTEGER ">"
-
     | VARBIT "<" INTEGER ">"
-
     ;
-
 typeOrVoid ::=
-      typeRef
+     typeRef
     | VOID
     | nonTypeName
         // This is necessary because template arguments may introduce the return type
     ;
-
 optTypeParameters ::=
-      /* empty */
-    | "<" typeParameterListt ">"
+     /* empty */
+    | "<" typeParameterArray ">"
     ;
-
-typeParameterListt ::=
-      p4ItemName
-    | typeParameterListt "," p4ItemName
+typeParameterArray ::=
+     p4ItemName
+    | typeParameterArray "," p4ItemName
     ;
-
 typeArg ::=
-      typeRef
+     typeRef
     | "_"
     ;
-
-typeArgumentListt ::=
-      typeArg
-    | typeArgumentListt "," typeArg
+typeArgumentArray ::=
+     typeArg
+    | typeArgumentArray "," typeArg
     ;
-
 typeDeclaration ::=
-      derivedTypeDeclaration
+     derivedTypeDeclaration
     | typedefDeclaration ";"
     | parserTypeDeclaration ";"
     | controlTypeDeclaration ";"
     | packageTypeDeclaration ";"
     ;
-
 derivedTypeDeclaration ::=
-      headerTypeDeclaration
+     headerTypeDeclaration
     | headerUnionDeclaration
     | structTypeDeclaration
     | enumDeclaration
     ;
-
 headerTypeDeclaration ::=
-      optAnnotations
+     optAnnotations
         HEADER p4ItemName
-        "{" structFieldListt "}"
+        "{" structFieldArray "}"
     ;
-
 structTypeDeclaration ::=
-      optAnnotations
+     optAnnotations
         STRUCT p4ItemName
-        "{" structFieldListt "}"
+        "{" structFieldArray "}"
     ;
-
 // experimental
 headerUnionDeclaration ::=
-      optAnnotations
+     optAnnotations
         HEADER_UNION p4ItemName
-        "{" structFieldListt "}"
+        "{" structFieldArray "}"
     ;
-
-structFieldListt ::=
-      /* empty */
-    | structFieldListt structField
+structFieldArray ::=
+     /* empty */
+    | structFieldArray structField
     ;
-
 structField ::=
-      optAnnotations typeRef p4ItemName ";"
+     optAnnotations typeRef p4ItemName ";"
     ;
-
 enumDeclaration ::=
-      optAnnotations
+     optAnnotations
         ENUM p4ItemName
-        "{" identifierListt "}"
+        "{" identifierArray "}"
     ;
-
 errorDeclaration ::=
-      ERROR "{" identifierListt "}"
+     ERROR "{" identifierArray "}"
     ;
-
 matchKindDeclaration ::=
-      MATCH_KIND "{" identifierListt "}"
-
+     MATCH_KIND "{" identifierArray "}"
     ;
-
-identifierListt ::=
-      p4ItemName
-    | identifierListt "," p4ItemName
+identifierArray ::=
+     p4ItemName
+    | identifierArray "," p4ItemName
     ;
-
 typedefDeclaration ::=
-      optAnnotations TYPEDEF typeRef p4ItemName
+     optAnnotations TYPEDEF typeRef p4ItemName
     | optAnnotations TYPEDEF derivedTypeDeclaration p4ItemName
     ;
-
 /*************************** STATEMENTS *************************/
-
 assignmentOrMethodCallStatement ::=
-      // These rules are overly permissive, but they avoid some conflicts
-      lvalue "(" argumentListt ")" ";"
-    | lvalue "<" typeArgumentListt ">" "(" argumentListt ")" ";"
+    // These rules are overly permissive, but they avoid some conflicts
+      lvalue "(" argumentArray ")" ";"
+    | lvalue "<" typeArgumentArray ">" "(" argumentArray ")" ";"
     | lvalue "=" expression ";"
     ;
-
 emptyStatement ::=
-      ";"
+     ";"
     ;
-
-exitStatement ::=
-      EXIT ";"
-    ;
-
+exitStatement ::= EXIT ";" ;
 returnStatement ::=
-      RETURN ";"
+     RETURN ";"
     | RETURN expression ";"
     ;
-
 conditionalStatement ::=
-      IF "(" expression ")" statement
+     IF "(" expression ")" statement
     | IF "(" expression ")" statement ELSE statement
     ;
-
 // To support direct invocation of a control or parser without instantiation
 directApplication ::=
-      typeName "." APPLY "(" argumentListt ")" ";"
+     typeName "." APPLY "(" argumentArray ")" ";"
     ;
-
 statement ::=
       assignmentOrMethodCallStatement
     | directApplication
@@ -435,188 +391,145 @@ statement ::=
     | exitStatement
     | switchStatement
     ;
-
 blockStatement ::=
-      optAnnotations "{"
-      statOrDeclListt "}"
+     optAnnotations "{"
+      statOrDeclArray "}"
     ;
-
-statOrDeclListt ::=
-      /* empty */
-    | statOrDeclListt statementOrDeclaration
+statOrDeclArray ::=
+     /* empty */
+    | statOrDeclArray statementOrDeclaration
     ;
-
 switchStatement ::=
-      SWITCH "(" expression ")" "{" switchCases "}"
+     SWITCH "(" expression ")" "{" switchCases "}"
     ;
-
 switchCases ::=
-      /* empty */
+     /* empty */
     | switchCases switchCase
     ;
-
 switchCase ::=
-      switchLabel ":" blockStatement
+     switchLabel ":" blockStatement
     | switchLabel ":"
     ;
-
 switchLabel ::=
-      p4ItemName
+     p4ItemName
     | DEFAULT
     ;
-
 statementOrDeclaration ::=
-      variableDeclaration
+     variableDeclaration
     | constantDeclaration
     | statement
     | instantiation
     ;
-
 /************************* TABLE *********************************/
-
 tableDeclaration ::=
-      optAnnotations
-        TABLE p4ItemName "{" tablePropertyListt "}"
-
+     optAnnotations
+        TABLE p4ItemName "{" tablePropertyArray "}"
     ;
-
-tablePropertyListt ::=
-      tableProperty
-    | tablePropertyListt tableProperty
+tablePropertyArray ::=
+     tableProperty
+    | tablePropertyArray tableProperty
     ;
-
 tableProperty ::=
-      KEY "=" "{" keyElementListt "}"
-    | ACTIONS "=" "{" actionListt "}"
-    | optAnnotations optCONST ENTRIES "=" "{" entriesListt "}"
+     KEY "=" "{" keyElementArray "}"
+    | ACTIONS "=" "{" actionArray "}"
+    | optAnnotations optCONST ENTRIES "=" "{" entriesArray "}"
     | optAnnotations optCONST IDENTIFIER "=" initializer ";"
     ;
-
-keyElementListt ::=
-      /* empty */
-    | keyElementListt keyElement
+keyElementArray ::=
+     /* empty */
+    | keyElementArray keyElement
     ;
-
 keyElement ::=
-      expression ":" p4ItemName optAnnotations ";"
-
+     expression ":" p4ItemName optAnnotations ";"
     ;
-
-actionListt ::=
-      /* empty */
-    | actionListt actionRef ";"
+actionArray ::=
+     /* empty */
+    | actionArray actionRef ";"
     ;
-
 actionRef ::=
-      optAnnotations p4ItemName
-    | optAnnotations p4ItemName "(" argumentListt ")"
-
+     optAnnotations p4ItemName
+    | optAnnotations p4ItemName "(" argumentArray ")"
     ;
-
 entry ::=
-      keysetExpression ":" actionBinding optAnnotations ";"
+     keysetExpression ":" actionBinding optAnnotations ";"
     ;
-
 actionBinding ::=
-      lvalue "(" argumentListt ")"
+     lvalue "(" argumentArray ")"
 
-    | lvalue "<" typeArgumentListt ">" "(" argumentListt ")"
-
-
-entriesListt ::=
-      entry
-    | entriesListt entry
+    | lvalue "<" typeArgumentArray ">" "(" argumentArray ")"
+entriesArray ::=
+     entry
+    | entriesArray entry
     ;
-
 /************************* ACTION ********************************/
-
 actionDeclaration ::=
-      optAnnotations ACTION p4ItemName "(" parameterListt ")" blockStatement
-
+     optAnnotations ACTION p4ItemName "(" parameterArray ")" blockStatement
     ;
-
 /************************* VARIABLES *****************************/
-
 variableDeclaration ::=
-      annotations typeRef p4ItemName optInitializer ";"
-
+     annotations typeRef p4ItemName optInitializer ";"
     | typeRef p4ItemName optInitializer ";"
-
     ;
-
 constantDeclaration ::=
-      optAnnotations CONST typeRef p4ItemName "=" initializer ";"
-
+     optAnnotations CONST typeRef p4ItemName "=" initializer ";"
     ;
-
 optInitializer ::=
-      /* empty */
+     /* empty */
     | "=" initializer
     ;
-
 initializer ::=
-      expression
+     expression
     ;
-
 /**************** Expressions ****************/
-
 // experimental
 functionDeclaration ::=
-      functionPrototype blockStatement
+     functionPrototype blockStatement
     ;
-
-argumentListt ::=
-      /* empty */
-    | nonEmptyArgListt
+argumentArray ::=
+     /* empty */
+    | nonEmptyArgArray
     ;
-
-nonEmptyArgListt ::=
-      argument
-    | nonEmptyArgListt "," argument
+nonEmptyArgArray ::=
+     argument
+    | nonEmptyArgArray "," argument
     ;
-
 argument ::=
-      expression
+     expression
     | "_"
     ;
-
-expressionListt ::=
-      /* empty */
+expressionArray ::=
+     /* empty */
     | expression
-    | expressionListt "," expression
+    | expressionArray "," expression
     ;
-
 prefixedNonTypeName ::=
-      nonTypeName
+     nonTypeName
     | dotPrefix nonTypeName
     ;
-
 lvalue ::=
-      prefixedNonTypeName
-    | THIS                                 // experimental
+     prefixedNonTypeName
+    | THIS                                // experimental
     | lvalue "." p4ItemName
     | lvalue "[" expression "]"
     | lvalue "[" expression ":" expression "]"
     ;
-
 expression ::=
-      INTEGER
+     INTEGER
     | STRING_LITERAL
     | TRUE
     | FALSE
-    | THIS                                 // experimental
+    | THIS                                // experimental
     | nonTypeName
     | "." nonTypeName
     | expression "[" expression "]"
     | expression "[" expression ":" expression "]"
-    | "{" expressionListt "}"
+    | "{" expressionArray "}"
     | "(" expression ")"
     | "!" expression
     | "~" expression
     | "-" expression
     | "+" expression
     | typeName "." p4ItemName
-
     | ERROR "." p4ItemName
     | expression "." p4ItemName
     | expression "*" expression
@@ -626,7 +539,6 @@ expression ::=
     | expression "-" expression
     | expression "<<" expression
     | expression ">" ">" expression
-
     | expression "<=" expression
     | expression ">=" expression
     | expression "<" expression
@@ -640,13 +552,10 @@ expression ::=
     | expression "&&" expression
     | expression "||" expression
     | expression "?" expression ":" expression
-    | expression "<" typeArgumentListt ">" "(" argumentListt ")"
-
+    | expression "<" typeArgumentArray ">" "(" argumentArray ")"
     // FIXME: the previous rule has the wrong precedence, and parses with
     // precedence weaker than casts.  There is no easy way to fix this in bison.
-    | expression "(" argumentListt ")"
-
-    | typeRef "(" argumentListt ")"
-
+    | expression "(" argumentArray ")"
+    | typeRef "(" argumentArray ")"
     | "(" typeRef ")" expression
     ;
