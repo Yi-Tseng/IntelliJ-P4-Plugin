@@ -2,7 +2,6 @@ package org.p4.p4plugin;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.intellij.lexer.FlexAdapter;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -12,7 +11,6 @@ import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 import org.p4.p4plugin.psi.P4LangTypes;
 
-import java.io.Reader;
 import java.util.Map;
 import java.util.Set;
 

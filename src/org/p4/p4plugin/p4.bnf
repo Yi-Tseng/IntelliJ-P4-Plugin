@@ -13,7 +13,7 @@
   tokenTypeClass="org.p4.p4plugin.psi.P4LangTokenType"
 }
 
-private item_ ::= (COMMENT|DONTCARE|PRE_PROCESS)
+private item_ ::= (program|COMMENT|DONTCARE|PRE_PROCESS)
 
 program ::= input END
 
