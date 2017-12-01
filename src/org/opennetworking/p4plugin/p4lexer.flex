@@ -18,14 +18,39 @@ import com.intellij.psi.tree.IElementType;
 %state NORMAL
 %state STRING
 
+%{
+
+private void blockComment() {
+    int zzInput;
+    int state = 0;
+    while(zzCurrentPos < zzEndRead) {
+        zzInput = Character.codePointAt(zzBuffer, zzCurrentPos);
+        zzCurrentPos += Character.charCount(zzInput);
+
+        if (zzInput == '*') {
+            state = 1;
+        } else {
+            if (zzInput == '/' && state == 1) {
+                // end of block comment, accept
+                zzMarkedPos = zzCurrentPos;
+                return;
+            } else {
+                state = 0;
+            }
+        }
+    }
+
+    // didn't find end of comment
+    zzAtEOF = true;
+    zzMarkedPos = zzCurrentPos;
+}
+
+%}
+
 %%
 
 
-
-"/*"            { yybegin(COMMENT); }
-<COMMENT>"*/"   { yybegin(NORMAL); return P4TokenTypes.COMMENT; }
-<COMMENT>.      { yybegin(COMMENT); }
-<COMMENT>[\n]   { yybegin(COMMENT); }
+"/*"                 { blockComment(); return P4TokenTypes.COMMENT; }
 
 [ \t\r]+        { yybegin(NORMAL); return P4TokenTypes.WHITE_SPACE; }
 [\n]            { yybegin(NORMAL); return P4TokenTypes.WHITE_SPACE; }
@@ -34,7 +59,7 @@ import com.intellij.psi.tree.IElementType;
 <COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); }
 
 
-L?\"(\\.|[^\"])*\" {return P4TokenTypes.STRING_LITERAL; }
+\"(\\.|[^\"])*\" {return P4TokenTypes.STRING_LITERAL; }
 
 
 "#"\w+          { yybegin(NORMAL); return P4TokenTypes.PRE_PROCESS; }
