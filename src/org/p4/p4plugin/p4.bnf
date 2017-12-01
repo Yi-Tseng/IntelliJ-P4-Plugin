@@ -28,12 +28,10 @@ tokens ::= [
     TUPLE TYPEDEF VARBIT VOID IDENTIFIER TYPE STRING_LITERAL INTEGER
 ]
 
-program ::= input END ;
-input ::=
-      /* epsilon */
-    | input declaration
-    | input ";"    // empty declaration
-    ;
+program
+
+program ::= [] (declaration)* ;
+
 declaration ::=
       constantDeclaration
     | externDeclaration
@@ -57,35 +55,26 @@ p4ItemName ::=
      nonTypeName
     | TYPE
     ;
-optCONST ::=
-     /* empty */
-    | CONST
-    ;
-optAnnotations ::=
-     /* empty */
-    | annotations
-    ;
-annotations ::=
-     annotation
-    | annotations annotation
-    ;
+
+optAnnotations ::= annotations? ;
+
+annotations ::= [](annotation)+;
+
 annotation ::=
      "@" p4ItemName
     | "@" p4ItemName "(" expressionArray ")"
     ;
-parameterArray ::=
-     /* empty */
-    | nonEmptyParameterArray
-    ;
+parameterArray ::= nonEmptyParameterArray? ;
+
 nonEmptyParameterArray ::=
-     parameter
-    | nonEmptyParameterArray "," parameter
+      parameter "," nonEmptyParameterArray
+    | parameter
     ;
 parameter ::=
-     optAnnotations direction typeRef p4ItemName
+      optAnnotations direction typeRef p4ItemName
     ;
 direction ::=
-     IN
+      IN
     | OUT
     | INOUT
     | /* empty */
@@ -107,30 +96,21 @@ instantiation ::=
 objInitializer ::=
      "{" objDeclarations "}"
     ;
-objDeclarations ::=
-     /* empty */
-    | objDeclarations objDeclaration
-    ;
+objDeclarations ::= [](objDeclaration)* ;
 objDeclaration ::=
-     functionDeclaration
+      functionDeclaration
     | instantiation
     ;
-optConstructorParameters ::=
-     /* empty */
-    | "(" parameterArray ")"
-    ;
-dotPrefix ::=
-     "."
-    ;
+
+optConstructorParameters ::= ("(" parameterArray ")")? ;
+dotPrefix ::= "." ;
+
 /**************************** PARSER ******************************/
 parserDeclaration ::=
      parserTypeDeclaration optConstructorParameters
       "{" parserLocalElements parserStates "}"
     ;
-parserLocalElements ::=
-     /* empty */
-    | parserLocalElements parserLocalElement
-    ;
+parserLocalElements ::= [](parserLocalElement)* ;
 parserLocalElement ::=
      constantDeclaration
     | instantiation
@@ -142,18 +122,12 @@ parserTypeDeclaration ::=
         optTypeParameters
         "(" parameterArray ")"
     ;
-parserStates ::=
-     parserState
-    | parserStates parserState
-    ;
+parserStates ::= [](parserState)+ ;
 parserState ::=
      optAnnotations STATE p4ItemName
       "{" parserStatements transitionStatement "}"
     ;
-parserStatements ::=
-     /* empty */
-    | parserStatements parserStatement
-    ;
+parserStatements ::= [](parserStatement)* ;
 parserStatement ::=
      assignmentOrMethodCallStatement
     | directApplication
@@ -164,24 +138,19 @@ parserStatement ::=
 parserBlockStatement ::=
      optAnnotations "{" parserStatements "}"
     ;
-transitionStatement ::=
-     /* empty */
-    | TRANSITION stateExpression
-    ;
+transitionStatement ::= (TRANSITION stateExpression)? ;
 stateExpression ::=
-     p4ItemName ";"
+      p4ItemName ";"
     | selectExpression
     ;
 selectExpression ::=
      SELECT "(" expressionArray ")" "{" selectCaseArray "}"
     ;
-selectCaseArray ::=
-     /* empty */
-    | selectCaseArray selectCase
-    ;
+selectCaseArray ::= [](selectCase)* ;
 selectCase ::=
      keysetExpression ":" p4ItemName ";"
     ;
+
 keysetExpression ::=
      tupleKeysetExpression
     | simpleKeysetExpression
@@ -191,8 +160,8 @@ tupleKeysetExpression
      "(" simpleKeysetExpression "," simpleExpressionArray ")"
     ;
 simpleExpressionArray ::=
-     simpleKeysetExpression
-    | simpleExpressionArray "," simpleKeysetExpression
+      simpleKeysetExpression
+    | simpleKeysetExpression "," simpleExpressionArray
     ;
 simpleKeysetExpression ::=
      expression
@@ -212,10 +181,7 @@ controlTypeDeclaration ::=
         optTypeParameters
         "(" parameterArray ")"
     ;
-controlLocalDeclarations ::=
-     /* empty */
-    | controlLocalDeclarations controlLocalDeclaration
-    ;
+controlLocalDeclarations ::= [](controlLocalDeclaration)* ;
 controlLocalDeclaration ::=
      constantDeclaration
     | actionDeclaration
@@ -235,10 +201,7 @@ externDeclaration ::=
     | optAnnotations EXTERN functionPrototype ";"
     | optAnnotations EXTERN p4ItemName ";"
     ;
-methodPrototypes ::=
-     /* empty */
-    | methodPrototypes methodPrototype
-    ;
+methodPrototypes ::= [](methodPrototype)* ;
 functionPrototype ::=
      typeOrVoid
         p4ItemName optTypeParameters
@@ -251,14 +214,14 @@ methodPrototype ::=
     ;
 /************************** TYPES ****************************/
 typeRef ::=
-     baseType
+      baseType
     | typeName
     | specializedType
     | headerStackType
     | tupleType
     ;
 prefixedType ::=
-     TYPE
+      TYPE
     | dotPrefix TYPE
     ;
 typeName ::=
@@ -274,7 +237,7 @@ specializedType ::=
      typeName "<" typeArgumentArray ">"
     ;
 baseType ::=
-     BOOL
+      BOOL
     | ERROR
     | BIT
     | BIT "<" INTEGER ">"
@@ -287,21 +250,18 @@ typeOrVoid ::=
     | nonTypeName
         // This is necessary because template arguments may introduce the return type
     ;
-optTypeParameters ::=
-     /* empty */
-    | "<" typeParameterArray ">"
-    ;
+optTypeParameters ::= ("<" typeParameterArray ">")? ;
 typeParameterArray ::=
-     p4ItemName
-    | typeParameterArray "," p4ItemName
+      p4ItemName
+    | p4ItemName "," typeParameterArray
     ;
 typeArg ::=
      typeRef
     | "_"
     ;
 typeArgumentArray ::=
-     typeArg
-    | typeArgumentArray "," typeArg
+      typeArg
+    | typeArg "," typeArgumentArray
     ;
 typeDeclaration ::=
      derivedTypeDeclaration
@@ -332,10 +292,8 @@ headerUnionDeclaration ::=
         HEADER_UNION p4ItemName
         "{" structFieldArray "}"
     ;
-structFieldArray ::=
-     /* empty */
-    | structFieldArray structField
-    ;
+structFieldArray ::= [](structField)* ;
+
 structField ::=
      optAnnotations typeRef p4ItemName ";"
     ;
@@ -351,8 +309,8 @@ matchKindDeclaration ::=
      MATCH_KIND "{" identifierArray "}"
     ;
 identifierArray ::=
-     p4ItemName
-    | identifierArray "," p4ItemName
+      p4ItemName
+    | p4ItemName "," identifierArray
     ;
 typedefDeclaration ::=
      optAnnotations TYPEDEF typeRef p4ItemName
@@ -395,17 +353,13 @@ blockStatement ::=
      optAnnotations "{"
       statOrDeclArray "}"
     ;
-statOrDeclArray ::=
-     /* empty */
-    | statOrDeclArray statementOrDeclaration
-    ;
+statOrDeclArray ::= [](statementOrDeclaration)* ;
+
 switchStatement ::=
      SWITCH "(" expression ")" "{" switchCases "}"
     ;
-switchCases ::=
-     /* empty */
-    | switchCases switchCase
-    ;
+switchCases ::= [](switchCase)* ;
+
 switchCase ::=
      switchLabel ":" blockStatement
     | switchLabel ":"
@@ -425,26 +379,22 @@ tableDeclaration ::=
      optAnnotations
         TABLE p4ItemName "{" tablePropertyArray "}"
     ;
-tablePropertyArray ::=
-     tableProperty
-    | tablePropertyArray tableProperty
-    ;
+tablePropertyArray ::= [](tableProperty)+ ;
+
 tableProperty ::=
      KEY "=" "{" keyElementArray "}"
     | ACTIONS "=" "{" actionArray "}"
-    | optAnnotations optCONST ENTRIES "=" "{" entriesArray "}"
-    | optAnnotations optCONST IDENTIFIER "=" initializer ";"
+    | optAnnotations CONST* ENTRIES "=" "{" entriesArray "}"
+    | optAnnotations CONST* IDENTIFIER "=" initializer ";"
     ;
-keyElementArray ::=
-     /* empty */
-    | keyElementArray keyElement
-    ;
+keyElementArray ::= [](keyElement)* ;
+
 keyElement ::=
      expression ":" p4ItemName optAnnotations ";"
     ;
 actionArray ::=
-     /* empty */
-    | actionArray actionRef ";"
+       actionRef ";" actionArray
+     | /* Empty */
     ;
 actionRef ::=
      optAnnotations p4ItemName
@@ -457,10 +407,8 @@ actionBinding ::=
      lvalue "(" argumentArray ")"
 
     | lvalue "<" typeArgumentArray ">" "(" argumentArray ")"
-entriesArray ::=
-     entry
-    | entriesArray entry
-    ;
+entriesArray ::= [](entry)+ ;
+
 /************************* ACTION ********************************/
 actionDeclaration ::=
      optAnnotations ACTION p4ItemName "(" parameterArray ")" blockStatement
@@ -473,10 +421,7 @@ variableDeclaration ::=
 constantDeclaration ::=
      optAnnotations CONST typeRef p4ItemName "=" initializer ";"
     ;
-optInitializer ::=
-     /* empty */
-    | "=" initializer
-    ;
+optInitializer ::= ("=" initializer)? ;
 initializer ::=
      expression
     ;
@@ -485,36 +430,38 @@ initializer ::=
 functionDeclaration ::=
      functionPrototype blockStatement
     ;
-argumentArray ::=
-     /* empty */
-    | nonEmptyArgArray
-    ;
+argumentArray ::= (nonEmptyArgArray)? ;
+
 nonEmptyArgArray ::=
-     argument
-    | nonEmptyArgArray "," argument
+      argument "," nonEmptyArgArray
+    | argument
     ;
 argument ::=
-     expression
-    | "_"
+      "_"
+    | expression
     ;
 expressionArray ::=
-     /* empty */
-    | expression
-    | expressionArray "," expression
+      expression
+    | expression "," expressionArray
     ;
 prefixedNonTypeName ::=
      nonTypeName
     | dotPrefix nonTypeName
     ;
+
 lvalue ::=
-     prefixedNonTypeName
+      prefixedNonTypeName
     | THIS                                // experimental
-    | lvalue "." p4ItemName
-    | lvalue "[" expression "]"
-    | lvalue "[" expression ":" expression "]"
+    | THIS "." lvalue
+    | THIS "[" expression "]"
+    | THIS "[" expression ":" expression "]"
+    | p4ItemName "." lvalue
+    | p4ItemName "[" expression "]"
+    | p4ItemName "[" expression ":" expression "]"
     ;
+
 expression ::=
-     INTEGER
+      INTEGER
     | STRING_LITERAL
     | TRUE
     | FALSE

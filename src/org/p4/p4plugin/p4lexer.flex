@@ -17,7 +17,7 @@ import com.intellij.psi.TokenType;
 
 %x COMMENT STRING
 %x LINE1 LINE2 LINE3
-%s NORMAL
+%s NORMAL TYPE_DEF
 %{
 
 private void blockComment() {
@@ -50,7 +50,7 @@ private void blockComment() {
 %%
 
 [ \t\r]+        { return TokenType.WHITE_SPACE; }
-[\n]            { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+[\n]            { return TokenType.WHITE_SPACE; }
 "//".*          { return P4LangTypes.COMMENT; }
 "/*"            { blockComment(); return P4LangTypes.COMMENT; }
 
@@ -64,7 +64,7 @@ private void blockComment() {
 <LINE1,LINE2>.        { yybegin(LINE3); }
 <LINE3>.                {}
 <LINE1,LINE2,LINE3>\n { yybegin(YYINITIAL); }
-<LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); }
+<LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.END; }
 
 \"              { yybegin(STRING); }
 <STRING>\\\"    {  }
@@ -89,21 +89,25 @@ private void blockComment() {
 "exit"          { yybegin(NORMAL); return P4LangTypes.EXIT; }
 "extern"        { yybegin(NORMAL); return P4LangTypes.EXTERN; }
 "false"         { yybegin(NORMAL); return P4LangTypes.FALSE; }
-"header"        { yybegin(NORMAL); return P4LangTypes.HEADER; }
-"header_union"  { yybegin(NORMAL); return P4LangTypes.HEADER_UNION; }
+
 "if"            { yybegin(NORMAL); return P4LangTypes.IF; }
-"in"            { yybegin(NORMAL); return P4LangTypes.IN; }
-"inout"         { yybegin(NORMAL); return P4LangTypes.INOUT; }
-"int"           { yybegin(NORMAL); return P4LangTypes.INT; }
+
+"header"        { yybegin(TYPE_DEF); return P4LangTypes.HEADER; }
+"header_union"  { yybegin(TYPE_DEF); return P4LangTypes.HEADER_UNION; }
+"in"            { yybegin(TYPE_DEF); return P4LangTypes.IN; }
+"inout"         { yybegin(TYPE_DEF); return P4LangTypes.INOUT; }
+"out"           { yybegin(TYPE_DEF); return P4LangTypes.OUT; }
+"int"           { yybegin(TYPE_DEF); return P4LangTypes.INT; }
+"struct"        { yybegin(TYPE_DEF); return P4LangTypes.STRUCT; }
+
 "key"           { yybegin(NORMAL); return P4LangTypes.KEY; }
 "match_kind"    { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-"out"           { yybegin(NORMAL); return P4LangTypes.OUT; }
 "parser"        { yybegin(NORMAL); return P4LangTypes.PARSER; }
 "package"       { yybegin(NORMAL); return P4LangTypes.PACKAGE; }
 "return"        { yybegin(NORMAL); return P4LangTypes.RETURN; }
 "select"        { yybegin(NORMAL); return P4LangTypes.SELECT; }
 "state"         { yybegin(NORMAL); return P4LangTypes.STATE; }
-"struct"        { yybegin(NORMAL); return P4LangTypes.STRUCT; }
+
 "switch"        { yybegin(NORMAL); return P4LangTypes.SWITCH; }
 "table"         { yybegin(NORMAL); return P4LangTypes.TABLE; }
 "this"          { yybegin(NORMAL); return P4LangTypes.THIS; }
@@ -114,7 +118,13 @@ private void blockComment() {
 "varbit"        { yybegin(NORMAL); return P4LangTypes.VARBIT; }
 "void"          { yybegin(NORMAL); return P4LangTypes.VOID; }
 "_"             { yybegin(NORMAL); return P4LangTypes.DONTCARE; }
-[A-Za-z_][A-Za-z0-9_]* {
+
+<TYPE_DEF>[A-Za-z_][A-Za-z0-9_]* {
+                  yybegin(NORMAL);
+                  return P4LangTypes.TYPE;
+                }
+
+<NORMAL>[A-Za-z_][A-Za-z0-9_]* {
                   yybegin(NORMAL);
                   return P4LangTypes.IDENTIFIER;
                 }
