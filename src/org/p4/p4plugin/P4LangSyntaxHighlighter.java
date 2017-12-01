@@ -1,4 +1,4 @@
-package org.opennetworking.p4plugin;
+package org.p4.p4plugin;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -7,9 +7,10 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
+import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
-import org.opennetworking.p4plugin.psi.P4TokenTypes;
+import org.p4.p4plugin.psi.P4LangTypes;
 
 import java.io.Reader;
 import java.util.Map;
@@ -20,46 +21,46 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final P4LangSyntaxHighlighter INSTANCE = new P4LangSyntaxHighlighter();
 
     private static final Set<IElementType> P4LANG_KEYWORDS = ImmutableSet.<IElementType>builder()
-            .add(P4TokenTypes.ABSTRACT)
-            .add(P4TokenTypes.ACTION)
-            .add(P4TokenTypes.ACTIONS)
-            .add(P4TokenTypes.APPLY)
-            .add(P4TokenTypes.BOOL)
-            .add(P4TokenTypes.BIT)
-            .add(P4TokenTypes.CONST)
-            .add(P4TokenTypes.CONTROL)
-            .add(P4TokenTypes.DEFAULT)
-            .add(P4TokenTypes.ELSE)
-            .add(P4TokenTypes.ENTRIES)
-            .add(P4TokenTypes.ENUM)
-            .add(P4TokenTypes.ERROR)
-            .add(P4TokenTypes.EXIT)
-            .add(P4TokenTypes.EXTERN)
-            .add(P4TokenTypes.FALSE)
-            .add(P4TokenTypes.HEADER)
-            .add(P4TokenTypes.HEADER_UNION)
-            .add(P4TokenTypes.IF)
-            .add(P4TokenTypes.IN)
-            .add(P4TokenTypes.INOUT)
-            .add(P4TokenTypes.INT)
-            .add(P4TokenTypes.KEY)
-            .add(P4TokenTypes.MATCH_KIND)
-            .add(P4TokenTypes.OUT)
-            .add(P4TokenTypes.PARSER)
-            .add(P4TokenTypes.PACKAGE)
-            .add(P4TokenTypes.RETURN)
-            .add(P4TokenTypes.SELECT)
-            .add(P4TokenTypes.STATE)
-            .add(P4TokenTypes.STRUCT)
-            .add(P4TokenTypes.SWITCH)
-            .add(P4TokenTypes.TABLE)
-            .add(P4TokenTypes.THIS)
-            .add(P4TokenTypes.TRANSITION)
-            .add(P4TokenTypes.TRUE)
-            .add(P4TokenTypes.TUPLE)
-            .add(P4TokenTypes.TYPEDEF)
-            .add(P4TokenTypes.VARBIT)
-            .add(P4TokenTypes.VOID)
+            .add(P4LangTypes.ABSTRACT)
+            .add(P4LangTypes.ACTION)
+            .add(P4LangTypes.ACTIONS)
+            .add(P4LangTypes.APPLY)
+            .add(P4LangTypes.BOOL)
+            .add(P4LangTypes.BIT)
+            .add(P4LangTypes.CONST)
+            .add(P4LangTypes.CONTROL)
+            .add(P4LangTypes.DEFAULT)
+            .add(P4LangTypes.ELSE)
+            .add(P4LangTypes.ENTRIES)
+            .add(P4LangTypes.ENUM)
+            .add(P4LangTypes.ERROR)
+            .add(P4LangTypes.EXIT)
+            .add(P4LangTypes.EXTERN)
+            .add(P4LangTypes.FALSE)
+            .add(P4LangTypes.HEADER)
+            .add(P4LangTypes.HEADER_UNION)
+            .add(P4LangTypes.IF)
+            .add(P4LangTypes.IN)
+            .add(P4LangTypes.INOUT)
+            .add(P4LangTypes.INT)
+            .add(P4LangTypes.KEY)
+            .add(P4LangTypes.MATCH_KIND)
+            .add(P4LangTypes.OUT)
+            .add(P4LangTypes.PARSER)
+            .add(P4LangTypes.PACKAGE)
+            .add(P4LangTypes.RETURN)
+            .add(P4LangTypes.SELECT)
+            .add(P4LangTypes.STATE)
+            .add(P4LangTypes.STRUCT)
+            .add(P4LangTypes.SWITCH)
+            .add(P4LangTypes.TABLE)
+            .add(P4LangTypes.THIS)
+            .add(P4LangTypes.TRANSITION)
+            .add(P4LangTypes.TRUE)
+            .add(P4LangTypes.TUPLE)
+            .add(P4LangTypes.TYPEDEF)
+            .add(P4LangTypes.VARBIT)
+            .add(P4LangTypes.VOID)
             .build();
 
     public static final TextAttributesKey P4LANG_KEYWORD = TextAttributesKey.createTextAttributesKey(
@@ -84,16 +85,16 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
 
     public static final Map<IElementType, TextAttributesKey> P4LANG_ATTR_KEYS =
             ImmutableMap.<IElementType, TextAttributesKey>builder()
-                    .put(P4TokenTypes.STRING_LITERAL, P4LANG_STRING)
-                    .put(P4TokenTypes.INTEGER, P4LANG_INTEGER)
-                    .put(P4TokenTypes.UNEXPECTED_TOKEN, P4LANG_UNKNOWN_TOKEN)
+                    .put(P4LangTypes.STRING_LITERAL, P4LANG_STRING)
+                    .put(P4LangTypes.INTEGER, P4LANG_INTEGER)
+                    .put(TokenType.BAD_CHARACTER, P4LANG_UNKNOWN_TOKEN)
                     .build();
 
 
     @NotNull
     @Override
     public Lexer getHighlightingLexer() {
-        return new FlexAdapter(new P4LangFlexLexer((Reader) null));
+        return new P4LangFlexLexerAdapter();
     }
 
     @NotNull

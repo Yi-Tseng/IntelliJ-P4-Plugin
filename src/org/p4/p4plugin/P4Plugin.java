@@ -1,4 +1,4 @@
-package org.opennetworking.p4plugin;
+package org.p4.p4plugin;
 
 import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.components.ProjectComponent;
