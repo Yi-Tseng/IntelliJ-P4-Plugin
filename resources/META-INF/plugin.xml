@@ -1,11 +1,11 @@
 <idea-plugin>
-  <id>org.opennetworking.p4plugin</id>
+  <id>org.p4.p4plugin</id>
   <name>P4 Plugin</name>
   <version>0.1</version>
-  <vendor email="yi@opennetworking.org" url="opennetworking.org">Open Networking Foundation</vendor>
+  <vendor email="yi@opennetworking.org" url="opennetworking.org">Yi Tseng</vendor>
 
   <description><![CDATA[
-      Plugin for P4....
+      Plugin for P4 language
     ]]></description>
 
   <change-notes><![CDATA[
@@ -25,8 +25,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
     <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileTypeFactory" />
-    <lang.parserDefinition language="P4Lang"
-                           implementationClass="org.p4.p4plugin.P4LangParserDefinition" />
+    <!--<lang.parserDefinition language="P4Lang"-->
+                           <!--implementationClass="org.p4.p4plugin.P4LangParserDefinition" />-->
     <lang.syntaxHighlighterFactory language="P4Lang"
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
 
