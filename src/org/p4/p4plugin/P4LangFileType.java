@@ -13,7 +13,7 @@ public class P4LangFileType extends LanguageFileType {
 
     public static P4LangFileType INSTANCE = new P4LangFileType();
 
-    protected P4LangFileType() {
+    P4LangFileType() {
         super(P4Lang.INSTANCE);
     }
 
@@ -38,6 +38,6 @@ public class P4LangFileType extends LanguageFileType {
     @Nullable
     @Override
     public Icon getIcon() {
-        return null;
+        return P4LangIcon.ICON;
     }
 }

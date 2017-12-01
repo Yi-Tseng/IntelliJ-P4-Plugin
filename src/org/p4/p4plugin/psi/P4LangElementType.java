@@ -1,4 +1,4 @@
-package org.opennetworking.p4plugin;
+package org.opennetworking.p4plugin.psi;
 
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
