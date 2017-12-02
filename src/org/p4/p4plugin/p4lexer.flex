@@ -16,8 +16,7 @@ import com.intellij.psi.TokenType;
 %type IElementType
 
 %x COMMENT STRING
-%x LINE1 LINE2 LINE3
-%s NORMAL TYPE_DEF
+%s NORMAL TYPE_DEF INCLUDE ANNONTATION
 %{
 
 private void blockComment() {
@@ -55,16 +54,7 @@ private void blockComment() {
 "/*"            { blockComment(); return P4LangTypes.COMMENT; }
 
 
-<YYINITIAL>"#line"      { yybegin(LINE1); }
-<YYINITIAL>"# "         { yybegin(LINE1); }
-<YYINITIAL>[ \t]*"#"    { yybegin(LINE3); }
-<LINE1>[0-9]+         { yybegin(LINE2); }
-<LINE2>\"[^\"]*       { yybegin(LINE3); }
-<LINE1,LINE2>[ \t]      {}
-<LINE1,LINE2>.        { yybegin(LINE3); }
-<LINE3>.                {}
-<LINE1,LINE2,LINE3>\n { yybegin(YYINITIAL); }
-<LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.END; }
+<COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.END; }
 
 \"              { yybegin(STRING); }
 <STRING>\\\"    {  }
@@ -73,25 +63,32 @@ private void blockComment() {
 <STRING>.       {  }
 <STRING>\n      {  }
 
+/* Preprocessors */
+"#include"   { return P4LangTypes.PRE_PROCESS; }
+"#define"    { return P4LangTypes.PRE_PROCESS; }
+"#ifdef"     { return P4LangTypes.PRE_PROCESS; }
+"#ifndef"    { return P4LangTypes.PRE_PROCESS; }
+"#else"      { return P4LangTypes.PRE_PROCESS; }
+"#endif"     { return P4LangTypes.PRE_PROCESS; }
+
 "abstract"      { yybegin(NORMAL); return P4LangTypes.ABSTRACT; }
 "action"        { yybegin(NORMAL); return P4LangTypes.ACTION; }
 "actions"       { yybegin(NORMAL); return P4LangTypes.ACTIONS; }
 "apply"         { yybegin(NORMAL); return P4LangTypes.APPLY; }
-"bool"          { yybegin(NORMAL); return P4LangTypes.BOOL; }
-"bit"           { yybegin(NORMAL); return P4LangTypes.BIT; }
+
 "const"         { yybegin(NORMAL); return P4LangTypes.CONST; }
 "control"       { yybegin(NORMAL); return P4LangTypes.CONTROL; }
 "default"       { yybegin(NORMAL); return P4LangTypes.DEFAULT; }
 "else"          { yybegin(NORMAL); return P4LangTypes.ELSE; }
 "entries"       { yybegin(NORMAL); return P4LangTypes.ENTRIES; }
-"enum"          { yybegin(NORMAL); return P4LangTypes.ENUM; }
+
 "error"         { yybegin(NORMAL); return P4LangTypes.ERROR; }
 "exit"          { yybegin(NORMAL); return P4LangTypes.EXIT; }
 "extern"        { yybegin(NORMAL); return P4LangTypes.EXTERN; }
 "false"         { yybegin(NORMAL); return P4LangTypes.FALSE; }
-
 "if"            { yybegin(NORMAL); return P4LangTypes.IF; }
 
+/* Type define */
 "header"        { yybegin(TYPE_DEF); return P4LangTypes.HEADER; }
 "header_union"  { yybegin(TYPE_DEF); return P4LangTypes.HEADER_UNION; }
 "in"            { yybegin(TYPE_DEF); return P4LangTypes.IN; }
@@ -99,6 +96,19 @@ private void blockComment() {
 "out"           { yybegin(TYPE_DEF); return P4LangTypes.OUT; }
 "int"           { yybegin(TYPE_DEF); return P4LangTypes.INT; }
 "struct"        { yybegin(TYPE_DEF); return P4LangTypes.STRUCT; }
+"bool"          { yybegin(TYPE_DEF); return P4LangTypes.BOOL; }
+"bit"           { yybegin(TYPE_DEF); return P4LangTypes.BIT; }
+"enum"          { yybegin(TYPE_DEF); return P4LangTypes.ENUM; }
+"typedef"       { yybegin(TYPE_DEF); return P4LangTypes.TYPEDEF; }
+"varbit"        { yybegin(TYPE_DEF); return P4LangTypes.VARBIT; }
+"void"          { yybegin(TYPE_DEF); return P4LangTypes.VOID; }
+
+/* Match kind */
+"ternary"       { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
+"exact"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
+"range"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
+"lpm"           { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
+"valid"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
 
 "key"           { yybegin(NORMAL); return P4LangTypes.KEY; }
 "match_kind"    { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
@@ -114,10 +124,17 @@ private void blockComment() {
 "transition"    { yybegin(NORMAL); return P4LangTypes.TRANSITION; }
 "true"          { yybegin(NORMAL); return P4LangTypes.TRUE; }
 "tuple"         { yybegin(NORMAL); return P4LangTypes.TUPLE; }
-"typedef"       { yybegin(NORMAL); return P4LangTypes.TYPEDEF; }
-"varbit"        { yybegin(NORMAL); return P4LangTypes.VARBIT; }
-"void"          { yybegin(NORMAL); return P4LangTypes.VOID; }
 "_"             { yybegin(NORMAL); return P4LangTypes.DONTCARE; }
+
+<ANNONTATION>[A-Za-z_][A-Za-z0-9_]* {
+                  yybegin(NORMAL);
+                  return P4LangTypes.ANNOTATION;
+                }
+
+<ANNONTATION>.+ {
+                  yybegin(NORMAL);
+                  return P4LangTypes.AT;
+}
 
 <TYPE_DEF>[A-Za-z_][A-Za-z0-9_]* {
                   yybegin(NORMAL);
@@ -198,6 +215,6 @@ private void blockComment() {
 "."            { yybegin(NORMAL); return P4LangTypes.DOT; }
 "="            { yybegin(NORMAL); return P4LangTypes.ASSIGN; }
 ";"            { yybegin(NORMAL); return P4LangTypes.SEMICOLON; }
-"@"            { yybegin(NORMAL); return P4LangTypes.AT; }
+"@"            { yybegin(ANNONTATION); }
 
 .              { return P4LangTypes.UNEXPECTED_TOKEN; }

@@ -29,7 +29,7 @@
                            <!--implementationClass="org.p4.p4plugin.P4LangParserDefinition" />-->
     <lang.syntaxHighlighterFactory language="P4Lang"
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
-
+    <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
   </extensions>
 
   <actions>
