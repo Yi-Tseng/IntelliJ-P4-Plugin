@@ -1,15 +1,16 @@
 <idea-plugin>
   <id>org.p4.p4plugin</id>
   <name>P4 Plugin</name>
-  <version>0.1</version>
-  <vendor email="yi@opennetworking.org" url="opennetworking.org">Yi Tseng</vendor>
+  <version>0.2</version>
+  <vendor email="yi@p4tw.org" url="p4tw.org">Yi Tseng</vendor>
 
   <description><![CDATA[
       Plugin for P4 language
     ]]></description>
 
   <change-notes><![CDATA[
-      Initial version
+      0.1 - Initial version
+      0.2 - Initial P4 grammar support
     ]]>
   </change-notes>
 
@@ -25,11 +26,12 @@
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
     <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileTypeFactory" />
-    <!--<lang.parserDefinition language="P4Lang"-->
-                           <!--implementationClass="org.p4.p4plugin.P4LangParserDefinition" />-->
+    <lang.parserDefinition language="P4Lang"
+                           implementationClass="org.p4.p4plugin.P4LangParserDefinition" />
     <lang.syntaxHighlighterFactory language="P4Lang"
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
+
   </extensions>
 
   <actions>

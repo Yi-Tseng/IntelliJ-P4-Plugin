@@ -1,5 +1,6 @@
 {
   parserClass="org.p4.p4plugin.parser.P4LangParser"
+  parserUtilClass="org.p4.p4plugin.parser.P4LangParserUtil"
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
   psiClassPrefix="P4Lang"
   psiImplClassSuffix="Impl"
@@ -26,483 +27,262 @@ tokens ::= [
     INOUT INT KEY SELECT MATCH_KIND PRE_PROCESS
     PACKAGE PARSER RETURN STATE STRUCT SWITCH TABLE TRANSITION
     TUPLE TYPEDEF VARBIT VOID IDENTIFIER TYPE STRING_LITERAL INTEGER
+    PLUS_SAT MINUS_SAT
 ]
 
 program
-
-program ::= [] (declaration)* ;
-
-declaration ::=
-      constantDeclaration
-    | externDeclaration
-    | actionDeclaration
-    | parserDeclaration
-    | typeDeclaration
-    | controlDeclaration
-    | instantiation
-    | errorDeclaration
-    | matchKindDeclaration
-    ;
-nonTypeName ::=
-      IDENTIFIER
-    | APPLY
-    | KEY
-    | ACTIONS
-    | STATE
-    | ENTRIES
-    ;
-p4ItemName ::=
-     nonTypeName
+program ::= (PRE_PROCESS | declaration)*
+declaration ::= typeDeclaration
+           | externDeclaration
+           | actionDeclaration
+           | parserDeclaration
+           | constantDeclaration
+           | controlDeclaration
+           | instantiation
+           | errorDeclaration
+           | matchKindDeclaration
+nonTypeName::= IDENTIFIER
+           | APPLY
+           | KEY
+           | ACTIONS
+           | STATE
+           | ENTRIES
+name_::= nonTypeName
     | TYPE
-    ;
+optCONST::= CONST?
+optAnnotations ::= (annotation)*
+annotation::= AT name_ L_PAREN expressionList_? R_PAREN | AT name_
+parameterList_::= nonEmptyParameterList_?
+nonEmptyParameterList_::= parameter (COMMA parameter)*
 
-optAnnotations ::= annotations? ;
+parameter::= optAnnotations direction? typeRef name_
+direction::= IN
+         | OUT
+         | INOUT
+packageTypeDeclaration::= optAnnotations PACKAGE name_ optTypeParameters? L_PAREN parameterList_ R_PAREN
+instantiation::= annotations typeRef L_PAREN argumentList_? R_PAREN name_ SEMICOLON
+             | typeRef L_PAREN argumentList_? R_PAREN name_ SEMICOLON
+             | annotations typeRef L_PAREN argumentList_? R_PAREN name_ ASSIGN objInitializer SEMICOLON
+             | typeRef L_PAREN argumentList_? R_PAREN name_ ASSIGN objInitializer SEMICOLON
+objInitializer::= L_BRACE objDeclarations R_BRACE
+objDeclarations::= (objDeclaration)*
+objDeclaration::= functionDeclaration
+              | instantiation
+optConstructorParameters::= L_PAREN parameterList_ R_PAREN
+dotPrefix::= DOT
+parserDeclaration::= parserTypeDeclaration optConstructorParameters? L_BRACE parserLocalElements parserStates R_BRACE
+parserLocalElements::= (parserLocalElement)*
+parserLocalElement::= constantDeclaration
+                  | instantiation
+                  | variableDeclaration
+parserTypeDeclaration::= optAnnotations PARSER name_ optTypeParameters? L_PAREN parameterList_ R_PAREN
+parserStates::= (parserState)+
+parserState::= optAnnotations STATE name_  L_BRACE parserStatements transitionStatement R_BRACE
+parserStatements::= (parserStatement)*
+parserStatement::= assignmentOrMethodCallStatement
+               | directApplication
+               | variableDeclaration
+               | constantDeclaration
+               | parserBlockStatement
+parserBlockStatement::= optAnnotations L_BRACE parserStatements R_BRACE
+transitionStatement::= TRANSITION stateExpression
+                   | /* empty */
+stateExpression::= name_ SEMICOLON
+               | selectExpression
+selectExpression::= SELECT L_PAREN expressionList_? R_PAREN L_BRACE selectCaseList_ R_BRACE
+selectCaseList_::= (selectCase)*
+selectCase::= keysetExpression COLON name_ SEMICOLON
+keysetExpression::= tupleKeysetExpression
+                | simpleKeysetExpression
+tupleKeysetExpression::= L_PAREN simpleKeysetExpression COMMA simpleexpressionList_? R_PAREN
+simpleexpressionList_::= simpleKeysetExpression (COMMA simpleKeysetExpression)*
+simpleKeysetExpression::= expression
+                      | expression MASK expression
+                      | expression RANGE expression
+                      | DEFAULT
+                      | DONTCARE
+controlDeclaration::= controlTypeDeclaration optConstructorParameters? L_BRACE controlLocalDeclarations APPLY controlBody R_BRACE
+controlTypeDeclaration::= optAnnotations CONTROL name_  optTypeParameters?  L_PAREN parameterList_ R_PAREN
+controlLocalDeclarations::= (controlLocalDeclaration)*
+controlLocalDeclaration::= constantDeclaration
+                       | actionDeclaration
+                       | tableDeclaration
+                       | instantiation
+                       | variableDeclaration
+controlBody::= blockStatement
+externDeclaration::= optAnnotations EXTERN nonTypeName  optTypeParameters?  L_BRACE methodPrototypes R_BRACE
+                 | optAnnotations EXTERN functionPrototype SEMICOLON
+                 | optAnnotations EXTERN name_ SEMICOLON
+methodPrototypes::= (methodPrototype)*
+functionPrototype::= typeOrVoid name_ optTypeParameters?  L_PAREN parameterList_ R_PAREN
+methodPrototype::= optAnnotations functionPrototype SEMICOLON
+               | optAnnotations ABSTRACT functionPrototype SEMICOLON
+               | optAnnotations TYPE L_PAREN parameterList_ R_PAREN SEMICOLON
+typeRef::= baseType
+       | typeName
+       | specializedType
+       | headerStackType
+       | tupleType
+       | valueSetType
+       | typedefName // name from typedef
+typedefName::= IDENTIFIER
+name_dType::= typeName
+         | specializedType
+prefixedType::= TYPE
+            | dotPrefix TYPE
+typeName::= prefixedType
+tupleType::= TUPLE L_ANGLE typeargumentList_? R_ANGLE
+valueSetType::= VALUESET L_ANGLE baseType R_ANGLE
+            | VALUESET L_ANGLE tupleType R_ANGLE
+            | VALUESET L_ANGLE typeName R_ANGLE
+headerStackType::= typeName L_BRACKET expression R_BRACKET
+specializedType::= typeName L_ANGLE typeargumentList_? R_ANGLE
+baseType::= BOOL
+        | ERROR
+        | BIT L_ANGLE INTEGER R_ANGLE
+        | BIT
+        | INT L_ANGLE INTEGER R_ANGLE
+        | VARBIT L_ANGLE INTEGER R_ANGLE
+typeOrVoid::= typeRef
+          | VOID
+          | nonTypeName
+optTypeParameters::= L_ANGLE typeParameterList_ R_ANGLE
+typeParameterList_::= name_ (COMMA name_)*
+typeArg::= typeRef
+       | nonTypeName
+       | DONTCARE
+typeargumentList_::= typeArg (COMMA typeArg)*
+realTypeArg::= typeRef
+           | DONTCARE
+realTypeargumentList_::= realTypeArg (COMMA typeArg)*
+typeDeclaration ::= derivedTypeDeclaration
+               | typedefDeclaration SEMICOLON
+               | parserTypeDeclaration SEMICOLON
+               | controlTypeDeclaration SEMICOLON
+               | packageTypeDeclaration SEMICOLON
+derivedTypeDeclaration::= headerTypeDeclaration
+                      | headerUnionDeclaration
+                      | structTypeDeclaration
+                      | enumDeclaration
+headerTypeDeclaration::= optAnnotations HEADER name_  L_BRACE structFieldList_ R_BRACE
+structTypeDeclaration::= optAnnotations STRUCT name_  L_BRACE structFieldList_ R_BRACE
+headerUnionDeclaration::= optAnnotations HEADER_UNION name_  L_BRACE structFieldList_ R_BRACE
+structFieldList_::= (structField)*
+structField::= optAnnotations typeRef name_ SEMICOLON
+enumDeclaration::= optAnnotations ENUM name_  L_BRACE identifierList_ R_BRACE
+errorDeclaration::= ERROR L_BRACE identifierList_ R_BRACE
+matchKindDeclaration::= MATCH_KIND L_BRACE identifierList_ R_BRACE
+identifierList_::= name_ (COMMA name_)*
+typedefDeclaration ::= optAnnotations TYPEDEF typeRef name_
+                  | optAnnotations TYPEDEF derivedTypeDeclaration name_
+assignmentOrMethodCallStatement::= lvalue L_PAREN argumentList_? R_PAREN SEMICOLON
+                               | lvalue L_ANGLE typeargumentList_? R_ANGLE L_PAREN argumentList_? R_PAREN SEMICOLON
+                               | lvalue ASSIGN expression SEMICOLON
+emptyStatement::= SEMICOLON
+exitStatement::= EXIT SEMICOLON
+returnStatement::= RETURN SEMICOLON
+               | RETURN expression SEMICOLON
+conditionalStatement::= IF L_PAREN expression R_PAREN statement
+                    | IF L_PAREN expression R_PAREN statement ELSE statement
+directApplication::= typeName DOT APPLY L_PAREN argumentList_? R_PAREN SEMICOLON
+statement::= assignmentOrMethodCallStatement
+         | directApplication
+         | conditionalStatement
+         | emptyStatement
+         | blockStatement
+         | returnStatement
+         | exitStatement
+         | switchStatement
+blockStatement::= optAnnotations L_BRACE  statOrDeclList_ R_BRACE
+statOrDeclList_::= (statementOrDeclaration)*
+switchStatement::= SWITCH L_PAREN expression R_PAREN L_BRACE switchCases R_BRACE
+switchCases::= (switchCase)*
+switchCase::= switchLabel COLON blockStatement
+          | switchLabel COLON
+switchLabel::= name_
+           | DEFAULT
+statementOrDeclaration::= variableDeclaration
+                      | constantDeclaration
+                      | statement
+                      | instantiation
+tableDeclaration::= optAnnotations TABLE name_ L_BRACE tablePropertyList_ R_BRACE
+tablePropertyList_::= (tableProperty)+
+tableProperty::= KEY ASSIGN L_BRACE keyElementList_ R_BRACE
+             | ACTIONS ASSIGN L_BRACE actionList_ R_BRACE
+             | optAnnotations optCONST ENTRIES ASSIGN L_BRACE entriesList_ R_BRACE
+             | optAnnotations optCONST IDENTIFIER ASSIGN initializer SEMICOLON
+keyElementList_::= (keyElement)*
+keyElement::= expression COLON name_ optAnnotations SEMICOLON
+actionList_::= (actionRef SEMICOLON)*
+actionRef::= optAnnotations name_ L_PAREN argumentList_? R_PAREN
+         | optAnnotations name_
+entry::= keysetExpression COLON actionBinding optAnnotations SEMICOLON
+actionBinding::= lvalue L_PAREN argumentList_? R_PAREN
+             | lvalue L_ANGLE typeargumentList_? R_ANGLE L_PAREN argumentList_? R_PAREN
+entriesList_::= (entry)+
+actionDeclaration::= optAnnotations ACTION name_ L_PAREN parameterList_ R_PAREN blockStatement
+variableDeclaration::= annotations typeRef name_ optInitializer? SEMICOLON
+                   | typeRef name_ optInitializer? SEMICOLON
+constantDeclaration ::= optAnnotations CONST typeRef name_ ASSIGN initializer SEMICOLON
+optInitializer::= ASSIGN initializer
+initializer::= expression
+functionDeclaration::= functionPrototype blockStatement
+argumentList_::= nonEmptyArgList_
+nonEmptyArgList_::= argument (COMMA argument)*
+argument::= expression
+        | DONTCARE
+expressionList_::= expression (COMMA expression)*
+prefixedNonTypeName::= nonTypeName
+                   | dotPrefix nonTypeName
 
-annotations ::= [](annotation)+;
+// Avoid L-recursive
+lvalue ::= prefixedNonTypeName lvalueDash?
+          | THIS lvalueDash?
+lvalueDash ::= DOT name_ lvalueDash?
+          | L_BRACKET expression R_BRACKET lvalueDash?
+          | L_BRACKET expression COLON expression R_BRACKET lvalueDash?
 
-annotation ::=
-     "@" p4ItemName
-    | "@" p4ItemName "(" expressionArray ")"
-    ;
-parameterArray ::= nonEmptyParameterArray? ;
+// Avoid L-recursive
+expression::= INTEGER expressionDash?
+          | STRING_LITERAL expressionDash?
+          | TRUE expressionDash?
+          | FALSE expressionDash?
+          | THIS expressionDash?
+          | nonTypeName expressionDash?
+          | DOT nonTypeName expressionDash?
+          | L_BRACE expressionList_? R_BRACE expressionDash?
+          | L_PAREN expression R_PAREN expressionDash?
+          | NOT expression expressionDash?
+          | COMPLEMENT expression expressionDash?
+          | MINUS expression expressionDash?
+          | PLUS expression expressionDash?
+          | typeName DOT name_ expressionDash?
+          | ERROR DOT name_ expressionDash?
+          | name_dType L_PAREN argumentList_? R_PAREN expressionDash?
+          | L_PAREN typeRef R_PAREN expression expressionDash?
 
-nonEmptyParameterArray ::=
-      parameter "," nonEmptyParameterArray
-    | parameter
-    ;
-parameter ::=
-      optAnnotations direction typeRef p4ItemName
-    ;
-direction ::=
-      IN
-    | OUT
-    | INOUT
-    | /* empty */
-    ;
-packageTypeDeclaration ::=
-     optAnnotations PACKAGE p4ItemName
-      optTypeParameters
-      "(" parameterArray ")"
-    ;
-instantiation ::=
-        annotations typeRef "(" argumentArray ")" p4ItemName ";"
-      | typeRef "(" argumentArray ")" p4ItemName ";"
-      /* experimental */
-      | annotations typeRef "(" argumentArray ")" p4ItemName "=" objInitializer ";"
-      /* experimental */
-      | typeRef "(" argumentArray ")" p4ItemName "=" objInitializer ";"
-    ;
-/* experimental; includes the following 3 productions */
-objInitializer ::=
-     "{" objDeclarations "}"
-    ;
-objDeclarations ::= [](objDeclaration)* ;
-objDeclaration ::=
-      functionDeclaration
-    | instantiation
-    ;
-
-optConstructorParameters ::= ("(" parameterArray ")")? ;
-dotPrefix ::= "." ;
-
-/**************************** PARSER ******************************/
-parserDeclaration ::=
-     parserTypeDeclaration optConstructorParameters
-      "{" parserLocalElements parserStates "}"
-    ;
-parserLocalElements ::= [](parserLocalElement)* ;
-parserLocalElement ::=
-     constantDeclaration
-    | instantiation
-    | variableDeclaration
-    ;
-parserTypeDeclaration ::=
-     optAnnotations
-        PARSER p4ItemName
-        optTypeParameters
-        "(" parameterArray ")"
-    ;
-parserStates ::= [](parserState)+ ;
-parserState ::=
-     optAnnotations STATE p4ItemName
-      "{" parserStatements transitionStatement "}"
-    ;
-parserStatements ::= [](parserStatement)* ;
-parserStatement ::=
-     assignmentOrMethodCallStatement
-    | directApplication
-    | variableDeclaration
-    | constantDeclaration
-    | parserBlockStatement
-    ;
-parserBlockStatement ::=
-     optAnnotations "{" parserStatements "}"
-    ;
-transitionStatement ::= (TRANSITION stateExpression)? ;
-stateExpression ::=
-      p4ItemName ";"
-    | selectExpression
-    ;
-selectExpression ::=
-     SELECT "(" expressionArray ")" "{" selectCaseArray "}"
-    ;
-selectCaseArray ::= [](selectCase)* ;
-selectCase ::=
-     keysetExpression ":" p4ItemName ";"
-    ;
-
-keysetExpression ::=
-     tupleKeysetExpression
-    | simpleKeysetExpression
-    ;
-tupleKeysetExpression
-    /* at least two elements in the tuple */ ::=
-     "(" simpleKeysetExpression "," simpleExpressionArray ")"
-    ;
-simpleExpressionArray ::=
-      simpleKeysetExpression
-    | simpleKeysetExpression "," simpleExpressionArray
-    ;
-simpleKeysetExpression ::=
-     expression
-    | expression "&&&" expression
-    | expression ".." expression
-    | DEFAULT
-    | "_"
-    ;
-/*************************** CONTROL ************************/
-controlDeclaration ::=
-     controlTypeDeclaration optConstructorParameters
-      "{" controlLocalDeclarations APPLY controlBody "}"
-    ;
-controlTypeDeclaration ::=
-     optAnnotations
-        CONTROL p4ItemName
-        optTypeParameters
-        "(" parameterArray ")"
-    ;
-controlLocalDeclarations ::= [](controlLocalDeclaration)* ;
-controlLocalDeclaration ::=
-     constantDeclaration
-    | actionDeclaration
-    | tableDeclaration
-    | instantiation
-    | variableDeclaration
-    ;
-controlBody ::=
-     blockStatement
-    ;
-/*************************** EXTERN *************************/
-externDeclaration ::=
-     optAnnotations
-        EXTERN nonTypeName
-        optTypeParameters
-        "{" methodPrototypes "}"
-    | optAnnotations EXTERN functionPrototype ";"
-    | optAnnotations EXTERN p4ItemName ";"
-    ;
-methodPrototypes ::= [](methodPrototype)* ;
-functionPrototype ::=
-     typeOrVoid
-        p4ItemName optTypeParameters
-        "(" parameterArray ")"
-    ;
-methodPrototype ::=
-     optAnnotations functionPrototype ";"
-    | optAnnotations ABSTRACT functionPrototype ";"     // experimental
-    | optAnnotations TYPE "(" parameterArray ")" ";"  // constructor
-    ;
-/************************** TYPES ****************************/
-typeRef ::=
-      baseType
-    | typeName
-    | specializedType
-    | headerStackType
-    | tupleType
-    ;
-prefixedType ::=
-      TYPE
-    | dotPrefix TYPE
-    ;
-typeName ::=
-     prefixedType
-    ;
-tupleType ::=
-     TUPLE "<" typeArgumentArray ">"
-    ;
-headerStackType ::=
-     typeName "[" expression "]"
-    ;
-specializedType ::=
-     typeName "<" typeArgumentArray ">"
-    ;
-baseType ::=
-      BOOL
-    | ERROR
-    | BIT
-    | BIT "<" INTEGER ">"
-    | INT "<" INTEGER ">"
-    | VARBIT "<" INTEGER ">"
-    ;
-typeOrVoid ::=
-     typeRef
-    | VOID
-    | nonTypeName
-        // This is necessary because template arguments may introduce the return type
-    ;
-optTypeParameters ::= ("<" typeParameterArray ">")? ;
-typeParameterArray ::=
-      p4ItemName
-    | p4ItemName "," typeParameterArray
-    ;
-typeArg ::=
-     typeRef
-    | "_"
-    ;
-typeArgumentArray ::=
-      typeArg
-    | typeArg "," typeArgumentArray
-    ;
-typeDeclaration ::=
-     derivedTypeDeclaration
-    | typedefDeclaration ";"
-    | parserTypeDeclaration ";"
-    | controlTypeDeclaration ";"
-    | packageTypeDeclaration ";"
-    ;
-derivedTypeDeclaration ::=
-     headerTypeDeclaration
-    | headerUnionDeclaration
-    | structTypeDeclaration
-    | enumDeclaration
-    ;
-headerTypeDeclaration ::=
-     optAnnotations
-        HEADER p4ItemName
-        "{" structFieldArray "}"
-    ;
-structTypeDeclaration ::=
-     optAnnotations
-        STRUCT p4ItemName
-        "{" structFieldArray "}"
-    ;
-// experimental
-headerUnionDeclaration ::=
-     optAnnotations
-        HEADER_UNION p4ItemName
-        "{" structFieldArray "}"
-    ;
-structFieldArray ::= [](structField)* ;
-
-structField ::=
-     optAnnotations typeRef p4ItemName ";"
-    ;
-enumDeclaration ::=
-     optAnnotations
-        ENUM p4ItemName
-        "{" identifierArray "}"
-    ;
-errorDeclaration ::=
-     ERROR "{" identifierArray "}"
-    ;
-matchKindDeclaration ::=
-     MATCH_KIND "{" identifierArray "}"
-    ;
-identifierArray ::=
-      p4ItemName
-    | p4ItemName "," identifierArray
-    ;
-typedefDeclaration ::=
-     optAnnotations TYPEDEF typeRef p4ItemName
-    | optAnnotations TYPEDEF derivedTypeDeclaration p4ItemName
-    ;
-/*************************** STATEMENTS *************************/
-assignmentOrMethodCallStatement ::=
-    // These rules are overly permissive, but they avoid some conflicts
-      lvalue "(" argumentArray ")" ";"
-    | lvalue "<" typeArgumentArray ">" "(" argumentArray ")" ";"
-    | lvalue "=" expression ";"
-    ;
-emptyStatement ::=
-     ";"
-    ;
-exitStatement ::= EXIT ";" ;
-returnStatement ::=
-     RETURN ";"
-    | RETURN expression ";"
-    ;
-conditionalStatement ::=
-     IF "(" expression ")" statement
-    | IF "(" expression ")" statement ELSE statement
-    ;
-// To support direct invocation of a control or parser without instantiation
-directApplication ::=
-     typeName "." APPLY "(" argumentArray ")" ";"
-    ;
-statement ::=
-      assignmentOrMethodCallStatement
-    | directApplication
-    | conditionalStatement
-    | emptyStatement
-    | blockStatement
-    | returnStatement
-    | exitStatement
-    | switchStatement
-    ;
-blockStatement ::=
-     optAnnotations "{"
-      statOrDeclArray "}"
-    ;
-statOrDeclArray ::= [](statementOrDeclaration)* ;
-
-switchStatement ::=
-     SWITCH "(" expression ")" "{" switchCases "}"
-    ;
-switchCases ::= [](switchCase)* ;
-
-switchCase ::=
-     switchLabel ":" blockStatement
-    | switchLabel ":"
-    ;
-switchLabel ::=
-     p4ItemName
-    | DEFAULT
-    ;
-statementOrDeclaration ::=
-     variableDeclaration
-    | constantDeclaration
-    | statement
-    | instantiation
-    ;
-/************************* TABLE *********************************/
-tableDeclaration ::=
-     optAnnotations
-        TABLE p4ItemName "{" tablePropertyArray "}"
-    ;
-tablePropertyArray ::= [](tableProperty)+ ;
-
-tableProperty ::=
-     KEY "=" "{" keyElementArray "}"
-    | ACTIONS "=" "{" actionArray "}"
-    | optAnnotations CONST* ENTRIES "=" "{" entriesArray "}"
-    | optAnnotations CONST* IDENTIFIER "=" initializer ";"
-    ;
-keyElementArray ::= [](keyElement)* ;
-
-keyElement ::=
-     expression ":" p4ItemName optAnnotations ";"
-    ;
-actionArray ::=
-       actionRef ";" actionArray
-     | /* Empty */
-    ;
-actionRef ::=
-     optAnnotations p4ItemName
-    | optAnnotations p4ItemName "(" argumentArray ")"
-    ;
-entry ::=
-     keysetExpression ":" actionBinding optAnnotations ";"
-    ;
-actionBinding ::=
-     lvalue "(" argumentArray ")"
-
-    | lvalue "<" typeArgumentArray ">" "(" argumentArray ")"
-entriesArray ::= [](entry)+ ;
-
-/************************* ACTION ********************************/
-actionDeclaration ::=
-     optAnnotations ACTION p4ItemName "(" parameterArray ")" blockStatement
-    ;
-/************************* VARIABLES *****************************/
-variableDeclaration ::=
-     annotations typeRef p4ItemName optInitializer ";"
-    | typeRef p4ItemName optInitializer ";"
-    ;
-constantDeclaration ::=
-     optAnnotations CONST typeRef p4ItemName "=" initializer ";"
-    ;
-optInitializer ::= ("=" initializer)? ;
-initializer ::=
-     expression
-    ;
-/**************** Expressions ****************/
-// experimental
-functionDeclaration ::=
-     functionPrototype blockStatement
-    ;
-argumentArray ::= (nonEmptyArgArray)? ;
-
-nonEmptyArgArray ::=
-      argument "," nonEmptyArgArray
-    | argument
-    ;
-argument ::=
-      "_"
-    | expression
-    ;
-expressionArray ::=
-      expression
-    | expression "," expressionArray
-    ;
-prefixedNonTypeName ::=
-     nonTypeName
-    | dotPrefix nonTypeName
-    ;
-
-lvalue ::=
-      prefixedNonTypeName
-    | THIS                                // experimental
-    | THIS "." lvalue
-    | THIS "[" expression "]"
-    | THIS "[" expression ":" expression "]"
-    | p4ItemName "." lvalue
-    | p4ItemName "[" expression "]"
-    | p4ItemName "[" expression ":" expression "]"
-    ;
-
-expression ::=
-      INTEGER
-    | STRING_LITERAL
-    | TRUE
-    | FALSE
-    | THIS                                // experimental
-    | nonTypeName
-    | "." nonTypeName
-    | expression "[" expression "]"
-    | expression "[" expression ":" expression "]"
-    | "{" expressionArray "}"
-    | "(" expression ")"
-    | "!" expression
-    | "~" expression
-    | "-" expression
-    | "+" expression
-    | typeName "." p4ItemName
-    | ERROR "." p4ItemName
-    | expression "." p4ItemName
-    | expression "*" expression
-    | expression "/" expression
-    | expression "%" expression
-    | expression "+" expression
-    | expression "-" expression
-    | expression "<<" expression
-    | expression ">" ">" expression
-    | expression "<=" expression
-    | expression ">=" expression
-    | expression "<" expression
-    | expression ">" expression
-    | expression "!=" expression
-    | expression "==" expression
-    | expression "&" expression
-    | expression "^" expression
-    | expression "|" expression
-    | expression "++" expression
-    | expression "&&" expression
-    | expression "||" expression
-    | expression "?" expression ":" expression
-    | expression "<" typeArgumentArray ">" "(" argumentArray ")"
-    // FIXME: the previous rule has the wrong precedence, and parses with
-    // precedence weaker than casts.  There is no easy way to fix this in bison.
-    | expression "(" argumentArray ")"
-    | typeRef "(" argumentArray ")"
-    | "(" typeRef ")" expression
-    ;
+expressionDash ::= L_BRACKET expression R_BRACKET expressionDash?
+          | L_BRACKET expression COLON expression R_BRACKET expressionDash?
+          | DOT name_ expressionDash?
+          | MUL expression expressionDash?
+          | DIV expression expressionDash?
+          | MOD expression expressionDash?
+          | PLUS expression expressionDash?
+          | MINUS expression expressionDash?
+          | SHL expression expressionDash?
+          | R_ANGLE R_ANGLE expression expressionDash?
+          | LE expression expressionDash?
+          | GE expression expressionDash?
+          | L_ANGLE expression expressionDash?
+          | R_ANGLE expression expressionDash?
+          | NE expression expressionDash?
+          | EQ expression expressionDash?
+          | BIT_AND expression expressionDash?
+          | BIT_XOR expression expressionDash?
+          | BIT_OR expression expressionDash?
+          | PP expression expressionDash?
+          | AND expression expressionDash?
+          | OR expression expressionDash?
+          | QUESTION expression COLON expression expressionDash?
+          | L_ANGLE realTypeargumentList_? R_ANGLE L_PAREN argumentList_? R_PAREN expressionDash?
+          | L_PAREN argumentList_? R_PAREN expressionDash?

@@ -3,9 +3,16 @@ package org.p4.p4plugin;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
+import org.p4.p4plugin.parser.P4LangParser;
+import org.p4.p4plugin.parser.P4LangParserUtil;
+import org.p4.p4plugin.psi.P4LangTokenType;
 import org.p4.p4plugin.psi.P4LangTypes;
 import com.intellij.psi.TokenType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
 
 %%
 
@@ -16,45 +23,39 @@ import com.intellij.psi.TokenType;
 %type IElementType
 
 %x COMMENT STRING
-%s NORMAL TYPE_DEF INCLUDE ANNONTATION
+%x LINE1 LINE2 LINE3
+%s NORMAL TYPEDEF
 %{
-
-private void blockComment() {
-    int zzInput;
-    int state = 0;
-    while(zzCurrentPos < zzEndRead) {
-        zzInput = Character.codePointAt(zzBuffer, zzCurrentPos);
-        zzCurrentPos += Character.charCount(zzInput);
-
-        if (zzInput == '*') {
-            state = 1;
-        } else {
-            if (zzInput == '/' && state == 1) {
-                // end of block comment, accept
-                zzMarkedPos = zzCurrentPos;
-                return;
-            } else {
-                state = 0;
-            }
-        }
-    }
-
-    // didn't find end of comment
-    zzAtEOF = true;
-    zzMarkedPos = zzCurrentPos;
-}
+private Logger log = LoggerFactory.getLogger(getClass());
 
 %}
 
 %%
 
 [ \t\r]+        { return TokenType.WHITE_SPACE; }
-[\n]            { return TokenType.WHITE_SPACE; }
+[\n]            { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
 "//".*          { return P4LangTypes.COMMENT; }
-"/*"            { blockComment(); return P4LangTypes.COMMENT; }
+"/*"            { yybegin(COMMENT); }
+<COMMENT>([^*]|[*][*]*[^/])*"*/"  { return P4LangTypes.COMMENT; }
 
-
-<COMMENT,NORMAL><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.END; }
+<YYINITIAL>"#line"      { yybegin(LINE1); }
+<YYINITIAL>"# "         { yybegin(LINE1); }
+<YYINITIAL>[ \t]*"#"    { yybegin(LINE3); }
+<LINE1>[0-9]+         { yybegin(LINE2); }
+<LINE2>\"[^\"]*       { yybegin(LINE3); }
+<LINE1>[ \t]      {}
+<LINE2>[ \t]      {}
+<LINE1>.        { yybegin(LINE3); }
+<LINE2>.        { yybegin(LINE3); }
+<LINE3>.                {}
+<LINE1>\n { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<LINE2>\n { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<LINE3>\n { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<LINE1><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<LINE2><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<LINE3><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
+<COMMENT><<EOF>> { yybegin(YYINITIAL); }
+<NORMAL><<EOF>> { yybegin(YYINITIAL); }
 
 \"              { yybegin(STRING); }
 <STRING>\\\"    {  }
@@ -63,102 +64,62 @@ private void blockComment() {
 <STRING>.       {  }
 <STRING>\n      {  }
 
-/* Preprocessors */
-"#include"   { return P4LangTypes.PRE_PROCESS; }
-"#define"    { return P4LangTypes.PRE_PROCESS; }
-"#ifdef"     { return P4LangTypes.PRE_PROCESS; }
-"#ifndef"    { return P4LangTypes.PRE_PROCESS; }
-"#else"      { return P4LangTypes.PRE_PROCESS; }
-"#endif"     { return P4LangTypes.PRE_PROCESS; }
 
 "abstract"      { yybegin(NORMAL); return P4LangTypes.ABSTRACT; }
 "action"        { yybegin(NORMAL); return P4LangTypes.ACTION; }
 "actions"       { yybegin(NORMAL); return P4LangTypes.ACTIONS; }
 "apply"         { yybegin(NORMAL); return P4LangTypes.APPLY; }
-
+"bool"          { yybegin(NORMAL); return P4LangTypes.BOOL; }
+"bit"           { yybegin(NORMAL); return P4LangTypes.BIT; }
 "const"         { yybegin(NORMAL); return P4LangTypes.CONST; }
 "control"       { yybegin(NORMAL); return P4LangTypes.CONTROL; }
 "default"       { yybegin(NORMAL); return P4LangTypes.DEFAULT; }
 "else"          { yybegin(NORMAL); return P4LangTypes.ELSE; }
 "entries"       { yybegin(NORMAL); return P4LangTypes.ENTRIES; }
-
+"enum"          { yybegin(NORMAL); return P4LangTypes.ENUM; }
 "error"         { yybegin(NORMAL); return P4LangTypes.ERROR; }
 "exit"          { yybegin(NORMAL); return P4LangTypes.EXIT; }
 "extern"        { yybegin(NORMAL); return P4LangTypes.EXTERN; }
 "false"         { yybegin(NORMAL); return P4LangTypes.FALSE; }
+"header"        { yybegin(NORMAL); return P4LangTypes.HEADER; }
+"header_union"  { yybegin(NORMAL); return P4LangTypes.HEADER_UNION; }
 "if"            { yybegin(NORMAL); return P4LangTypes.IF; }
-
-/* Type define */
-"header"        { yybegin(TYPE_DEF); return P4LangTypes.HEADER; }
-"header_union"  { yybegin(TYPE_DEF); return P4LangTypes.HEADER_UNION; }
-"in"            { yybegin(TYPE_DEF); return P4LangTypes.IN; }
-"inout"         { yybegin(TYPE_DEF); return P4LangTypes.INOUT; }
-"out"           { yybegin(TYPE_DEF); return P4LangTypes.OUT; }
-"int"           { yybegin(TYPE_DEF); return P4LangTypes.INT; }
-"struct"        { yybegin(TYPE_DEF); return P4LangTypes.STRUCT; }
-"bool"          { yybegin(TYPE_DEF); return P4LangTypes.BOOL; }
-"bit"           { yybegin(TYPE_DEF); return P4LangTypes.BIT; }
-"enum"          { yybegin(TYPE_DEF); return P4LangTypes.ENUM; }
-"typedef"       { yybegin(TYPE_DEF); return P4LangTypes.TYPEDEF; }
-"varbit"        { yybegin(TYPE_DEF); return P4LangTypes.VARBIT; }
-"void"          { yybegin(TYPE_DEF); return P4LangTypes.VOID; }
-
-/* Match kind */
-"ternary"       { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-"exact"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-"range"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-"lpm"           { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-"valid"         { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
-
+"in"            { yybegin(NORMAL); return P4LangTypes.IN; }
+"inout"         { yybegin(NORMAL); return P4LangTypes.INOUT; }
+"int"           { yybegin(NORMAL); return P4LangTypes.INT; }
 "key"           { yybegin(NORMAL); return P4LangTypes.KEY; }
 "match_kind"    { yybegin(NORMAL); return P4LangTypes.MATCH_KIND; }
+"out"           { yybegin(NORMAL); return P4LangTypes.OUT; }
 "parser"        { yybegin(NORMAL); return P4LangTypes.PARSER; }
 "package"       { yybegin(NORMAL); return P4LangTypes.PACKAGE; }
 "return"        { yybegin(NORMAL); return P4LangTypes.RETURN; }
 "select"        { yybegin(NORMAL); return P4LangTypes.SELECT; }
 "state"         { yybegin(NORMAL); return P4LangTypes.STATE; }
-
+"struct"        { yybegin(NORMAL); return P4LangTypes.STRUCT; }
 "switch"        { yybegin(NORMAL); return P4LangTypes.SWITCH; }
 "table"         { yybegin(NORMAL); return P4LangTypes.TABLE; }
 "this"          { yybegin(NORMAL); return P4LangTypes.THIS; }
 "transition"    { yybegin(NORMAL); return P4LangTypes.TRANSITION; }
 "true"          { yybegin(NORMAL); return P4LangTypes.TRUE; }
 "tuple"         { yybegin(NORMAL); return P4LangTypes.TUPLE; }
+"typedef"       { yybegin(NORMAL); return P4LangTypes.TYPEDEF; }
+"varbit"        { yybegin(NORMAL); return P4LangTypes.VARBIT; }
+"value_set"     { yybegin(NORMAL); return P4LangTypes.VALUESET; }
+"void"          { yybegin(NORMAL); return P4LangTypes.VOID; }
 "_"             { yybegin(NORMAL); return P4LangTypes.DONTCARE; }
-
-<ANNONTATION>[A-Za-z_][A-Za-z0-9_]* {
-                  yybegin(NORMAL);
-                  return P4LangTypes.ANNOTATION;
-                }
-
-<ANNONTATION>.+ {
-                  yybegin(NORMAL);
-                  return P4LangTypes.AT;
+[A-Za-z_][A-Za-z0-9_]* {
+          return P4LangTypes.IDENTIFIER;
 }
-
-<TYPE_DEF>[A-Za-z_][A-Za-z0-9_]* {
-                  yybegin(NORMAL);
-                  return P4LangTypes.TYPE;
-                }
-
-<NORMAL>[A-Za-z_][A-Za-z0-9_]* {
-                  yybegin(NORMAL);
-                  return P4LangTypes.IDENTIFIER;
-                }
 
 0[xX][0-9a-fA-F_]+ { yybegin(NORMAL);
                      return P4LangTypes.INTEGER; }
 0[dD][0-9_]+       { yybegin(NORMAL);
-                     
                      return P4LangTypes.INTEGER; }
 0[oO][0-7_]+       { yybegin(NORMAL);
-                     
                      return P4LangTypes.INTEGER; }
 0[bB][01_]+        { yybegin(NORMAL);
-                     
                      return P4LangTypes.INTEGER; }
 [0-9][0-9_]*       { yybegin(NORMAL);
-                     
                      return P4LangTypes.INTEGER; }
 
 [0-9]+[ws]0[xX][0-9a-fA-F_]+ { yybegin(NORMAL);
@@ -215,6 +176,6 @@ private void blockComment() {
 "."            { yybegin(NORMAL); return P4LangTypes.DOT; }
 "="            { yybegin(NORMAL); return P4LangTypes.ASSIGN; }
 ";"            { yybegin(NORMAL); return P4LangTypes.SEMICOLON; }
-"@"            { yybegin(ANNONTATION); }
+"@"            { yybegin(NORMAL); return P4LangTypes.AT;}
 
 .              { return P4LangTypes.UNEXPECTED_TOKEN; }

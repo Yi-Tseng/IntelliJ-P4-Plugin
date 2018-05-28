@@ -15,14 +15,21 @@ import org.jetbrains.annotations.NotNull;
 import org.p4.p4plugin.parser.P4LangParser;
 import org.p4.p4plugin.psi.P4LangFile;
 import org.p4.p4plugin.psi.P4LangTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class P4LangParserDefinition implements ParserDefinition {
-
+    private Logger log = LoggerFactory.getLogger(getClass());
     public static final IFileElementType FILE = new IFileElementType(P4Lang.INSTANCE);
 
     public static final TokenSet STRING_LITERALS = TokenSet.create(P4LangTypes.STRING_LITERAL);
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(P4LangTypes.COMMENT);
+
+    public P4LangParserDefinition() {
+        log.info("P4LangParserDefinition Created");
+    }
 
     @NotNull
     @Override

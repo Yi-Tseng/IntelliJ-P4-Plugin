@@ -1,6 +1,3 @@
-/*
- * This is a demo P4 file.....
- */
 
 // This is a demo P4 file.....
 
@@ -63,6 +60,7 @@ header udp_t {
     bit<16> length_;
     bit<16> checksum;
 }
+
 struct headers_t {
     packet_out_header_t packet_out;
     packet_in_header_t packet_in;
@@ -78,7 +76,7 @@ struct local_metadata_t {
     next_hop_id_t next_hop_id;
 }
 
-parser parser_impl(packet_in packet,
+parser parser_impl (packet_in packet,
                   out headers_t hdr,
                   inout local_metadata_t local_metadata,
                   inout standard_metadata_t standard_metadata) {
