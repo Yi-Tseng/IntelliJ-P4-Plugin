@@ -3,9 +3,9 @@ IntelliJ P4 language plugin
 
 Working in progress:
  - Syntax highlighting
+ - Grammer check
 
 TODO:
- - Grammer check
  - P4 Build support
  - Code completed
 
