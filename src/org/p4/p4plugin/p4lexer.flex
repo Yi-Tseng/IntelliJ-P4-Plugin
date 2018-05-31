@@ -34,9 +34,11 @@ private Logger log = LoggerFactory.getLogger(getClass());
 
 [ \t\r]+        { return TokenType.WHITE_SPACE; }
 [\n]            { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-"//".*          { return P4LangTypes.COMMENT; }
+"//"([^\n])*          { yybegin(NORMAL); return P4LangTypes.COMMENT; }
 "/*"            { yybegin(COMMENT); }
-<COMMENT>([^*]|[*][*]*[^/])*"*/"  { return P4LangTypes.COMMENT; }
+<COMMENT>([^*]|[*]+[^/*])*[*]+"/"  { yybegin(NORMAL); return P4LangTypes.COMMENT; }
+<COMMENT>.     {  }
+<COMMENT>\n     {  }
 
 <YYINITIAL>"#line"      { yybegin(LINE1); }
 <YYINITIAL>"# "         { yybegin(LINE1); }
@@ -54,7 +56,7 @@ private Logger log = LoggerFactory.getLogger(getClass());
 <LINE1><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
 <LINE2><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
 <LINE3><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.PRE_PROCESS; }
-<COMMENT><<EOF>> { yybegin(YYINITIAL); }
+<COMMENT><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.COMMENT; }
 <NORMAL><<EOF>> { yybegin(YYINITIAL); }
 
 \"              { yybegin(STRING); }
