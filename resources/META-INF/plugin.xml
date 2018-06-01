@@ -9,8 +9,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      0.1 - Initial version
-      0.2 - Initial P4 grammar support
+      Initial P4 grammar support
     ]]>
   </change-notes>
 
@@ -24,13 +23,22 @@
   -->
 
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
+
+    <!-- Language support -->
     <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileTypeFactory" />
     <lang.parserDefinition language="P4Lang"
                            implementationClass="org.p4.p4plugin.P4LangParserDefinition" />
     <lang.syntaxHighlighterFactory language="P4Lang"
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
+
+    <!-- Modules -->
+    <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
+    <moduleType id="P4_MODULE" implementationClass="org.p4.p4plugin.module.P4ModuleType"/>
+    <facetType implementation="org.p4.p4plugin.module.facet.P4FacetType" />
+
+    <!-- Wizard -->
+    <moduleBuilder builderClass="org.p4.p4plugin.module.P4ModuleBuilder" id="P4_STEP" order="first"/>
 
   </extensions>
 
