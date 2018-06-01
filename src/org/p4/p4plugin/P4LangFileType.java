@@ -3,6 +3,7 @@ package org.p4.p4plugin;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.p4.p4plugin.icon.P4LangIcon;
 
 import javax.swing.*;
 

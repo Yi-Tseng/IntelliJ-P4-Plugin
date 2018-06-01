@@ -9,6 +9,7 @@ import com.intellij.openapi.options.colors.ColorSettingsPage;
 import kotlin.text.Charsets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.p4.p4plugin.icon.P4LangIcon;
 
 import javax.swing.*;
 import java.io.IOException;

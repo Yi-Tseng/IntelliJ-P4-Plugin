@@ -68,7 +68,17 @@ public class P4LangParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public PsiElement createElement(ASTNode node) {
+        if (node.getElementType().equals(P4LangTypes.TYPEDEF_DECLARATION)) {
+            rememberTypeDef(node);
+        }
         return P4LangTypes.Factory.createElement(node);
+    }
+
+    private void rememberTypeDef(ASTNode node) {
+        ASTNode nameNode = node.findChildByType(P4LangTypes.NAME_);
+        if (nameNode != null) {
+            String typeName = nameNode.getText();
+        }
     }
 
     @Override

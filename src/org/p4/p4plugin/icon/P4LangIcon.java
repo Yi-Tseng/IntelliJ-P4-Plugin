@@ -1,4 +1,4 @@
-package org.p4.p4plugin;
+package org.p4.p4plugin.icon;
 
 import com.intellij.openapi.util.IconLoader;
 

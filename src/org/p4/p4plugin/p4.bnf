@@ -11,6 +11,8 @@
   tokenTypeClass="org.p4.p4plugin.psi.P4LangTokenType"
 }
 
+
+
 tokens ::= [
     END UNEXPECTED_TOKEN COMMENT
     LE GE
