@@ -1,9 +1,12 @@
 IntelliJ P4 language plugin
 ====
 
-Working in progress:
+Currently supported:
  - Syntax highlighting
  - Grammer check
+
+Working in progress:
+ - P4 Module support (Module, SDK...)
 
 TODO:
  - P4 Build support
