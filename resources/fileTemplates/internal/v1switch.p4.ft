@@ -1,0 +1,56 @@
+\#include <core.p4>
+\#include <v1model.p4>
+
+struct my_metadata_t {
+}
+
+struct headers_t {
+}
+
+parser parser_impl (packet_in packet,
+                    out headers_t hdr,
+                    inout my_metadata_t my_metadata,
+                    inout standard_metadata_t standard_metadata) {
+    state start {
+        transition accept;
+    }
+}
+
+control deparser(packet_out packet, in headers_t hdr) {
+    apply {
+        packet.emit(hdr);
+    }
+}
+
+control verify_checksum_control(inout headers_t hdr,
+                                inout my_metadata_t my_metadata) {
+    apply {
+    }
+}
+
+control compute_checksum_control(inout headers_t hdr,
+                                 inout my_metadata_t my_metadata) {
+    apply {
+    }
+}
+
+control ingress_control(inout headers_t hdr,
+                        inout my_metadata_t my_metadata,
+                        inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+control egress_control(inout headers_t hdr,
+                        inout my_metadata_t my_metadata,
+                        inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+V1Switch(parser_impl(),
+         verify_checksum_control(),
+         ingress_control(),
+         egress_control(),
+         compute_checksum_control(),
+         deparser()) main;

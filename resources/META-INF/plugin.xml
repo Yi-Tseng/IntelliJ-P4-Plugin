@@ -41,10 +41,14 @@
     <!-- Wizard -->
     <moduleBuilder builderClass="org.p4.p4plugin.module.P4ModuleBuilder" id="P4_STEP" order="first"/>
 
+    <internalFileTemplate name="empty" />
+    <internalFileTemplate name="v1switch" />
   </extensions>
 
   <actions>
-    <!-- Add your actions here -->
+    <action class="org.p4.p4plugin.action.NewP4FileAction" id="P4.NewFile" text="P4 File" description="Create new P4 file">
+      <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+    </action>
   </actions>
 
   <project-components>

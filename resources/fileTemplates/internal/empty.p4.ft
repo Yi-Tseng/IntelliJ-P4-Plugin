@@ -1,0 +1,4 @@
+#ifdef _${ALL_CASE_NAME}_P4_
+\#define _${ALL_CASE_NAME}_P4_
+
+#endif
