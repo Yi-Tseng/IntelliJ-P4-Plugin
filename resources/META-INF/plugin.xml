@@ -9,7 +9,9 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      Initial P4 grammar support
+      <p>0.1 - Initial P4 syntax highlight support</p></br>
+      <p>0.2 - Initial P4 grammar support</p></br>
+      <p>0.3 - P4 Module, Project, File template support</p></br>
     ]]>
   </change-notes>
 
@@ -32,6 +34,7 @@
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
     <lang.commenter implementationClass="org.p4.p4plugin.P4Commenter" />
+    <annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4TypeRefAnnotator" />
 
     <!-- Modules -->
     <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
@@ -41,6 +44,7 @@
     <!-- Wizard -->
     <moduleBuilder builderClass="org.p4.p4plugin.module.P4ModuleBuilder" id="P4_STEP" order="first"/>
 
+    <!-- File Templates -->
     <internalFileTemplate name="empty" />
     <internalFileTemplate name="v1switch" />
   </extensions>

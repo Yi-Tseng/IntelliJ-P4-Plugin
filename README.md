@@ -4,9 +4,11 @@ IntelliJ P4 language plugin
 Currently supported:
  - Syntax highlighting
  - Grammer check
+ - P4 Module support (Module, SDK...)
 
 Working in progress:
- - P4 Module support (Module, SDK...)
+ - P4 settings (Compiler path, include paths....)
+ - TypeRef check
 
 TODO:
  - P4 Build support
