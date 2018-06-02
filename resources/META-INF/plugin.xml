@@ -31,6 +31,7 @@
     <lang.syntaxHighlighterFactory language="P4Lang"
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
+    <lang.commenter implementationClass="org.p4.p4plugin.P4Commenter" />
 
     <!-- Modules -->
     <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
