@@ -1,12 +1,12 @@
 package org.p4.p4plugin;
 
 import com.intellij.openapi.components.AbstractProjectComponent;
-import com.intellij.openapi.components.ProjectComponent;
-import com.intellij.openapi.fileTypes.FileTypeFactory;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 public class P4Plugin extends AbstractProjectComponent {
+
+    private static final String DEFAULT_P4_INCLUDE_PATH = "/usr/local/share/p4c/p4include";
 
     public P4Plugin(Project project) {
         super(project);
@@ -14,8 +14,10 @@ public class P4Plugin extends AbstractProjectComponent {
 
     @Override
     public void initComponent() {
-        // TODO: insert component initialization logic here
-
+        if (!P4PluginConfig.CONFIG_FILE.exists()) {
+            // initialize the config file
+            P4PluginConfig.writeConfig(P4PluginConfig.P4_INCLUDE_PATH_KEY, DEFAULT_P4_INCLUDE_PATH);
+        }
     }
 
     @Override

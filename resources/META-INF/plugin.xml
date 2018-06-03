@@ -53,6 +53,11 @@
     <action class="org.p4.p4plugin.action.NewP4FileAction" id="P4.NewFile" text="P4 File" description="Create new P4 file">
       <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
     </action>
+    <action id="P4LangSettingAction"
+            class="org.p4.p4plugin.action.P4LangSettingAction"
+            text="P4 Language Settings" description="P4 Language settings">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
   </actions>
 
   <project-components>

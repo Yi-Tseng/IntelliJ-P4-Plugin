@@ -39,13 +39,10 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
     }
 
     public static Set<String> getAllPossibleTypes(Project project) {
-
         Collection<VirtualFile> files =
                 FileBasedIndex.getInstance().getContainingFiles(ID.create("filetypes"), P4LangFileType.INSTANCE,
                                                                 GlobalSearchScope.allScope(project));
-
         Set<String> result = Sets.newHashSet();
-
         for (VirtualFile file : files) {
             P4LangFile p4File = (P4LangFile) PsiManager.getInstance(project).findFile(file);
             if (p4File == null) {
