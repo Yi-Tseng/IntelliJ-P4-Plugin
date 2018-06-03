@@ -33,8 +33,7 @@ tokens ::= [
 ]
 
 program
-program ::= (preProcessDeclaration | declaration)*
-preProcessDeclaration::= PRE_PROCESS {methods=[isInclude isGlobalInclude getIncludeFile]}
+program ::= declaration*
 declaration ::= typeDeclaration
            | externDeclaration
            | actionDeclaration

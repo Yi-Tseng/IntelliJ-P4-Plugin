@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.intellij.lang.parser.GeneratedParserUtilBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -15,9 +16,9 @@ import org.p4.p4plugin.psi.P4LangFunctionPrototype;
 import org.p4.p4plugin.psi.P4LangName_;
 import org.p4.p4plugin.psi.P4LangNonTypeName;
 import org.p4.p4plugin.psi.P4LangPackageTypeDeclaration;
-import org.p4.p4plugin.psi.P4LangPreProcessDeclaration;
 import org.p4.p4plugin.psi.P4LangProgram;
 import org.p4.p4plugin.psi.P4LangTypeDeclaration;
+import org.p4.p4plugin.psi.P4LangTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +31,12 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
     private static final Pattern GLOBAL_INC_FILE = Pattern.compile("<([^>]+)>");
     private static final Pattern LOCAL_INC_FILE = Pattern.compile("\"([^>]+)\"");
 
-    public static boolean isInclude(P4LangPreProcessDeclaration preProcess) {
-        return preProcess.getText().contains("include");
+    public static boolean isInclude(PsiComment comment) {
+        return comment.getTokenType().equals(P4LangTypes.PRE_PROCESS) &&
+                comment.getText().contains("include");
     }
 
-    public static String getIncludeFile(P4LangPreProcessDeclaration preProcess) {
+    public static String getIncludeFile(PsiComment preProcess) {
         String text = preProcess.getText();
         Matcher matcher = GLOBAL_INC_FILE.matcher(text);
         if (matcher.find()) {

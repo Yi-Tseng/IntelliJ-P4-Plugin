@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -14,8 +15,6 @@ import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
 import org.jetbrains.annotations.NotNull;
 import org.p4.p4plugin.parser.P4LangParserUtil;
-import org.p4.p4plugin.psi.P4LangPreProcessDeclaration;
-import org.p4.p4plugin.psi.P4LangProgram;
 import org.p4.p4plugin.psi.P4LangTypeRef;
 import org.p4.p4plugin.psi.P4LangTypedefName;
 import org.slf4j.Logger;
@@ -63,13 +62,10 @@ public class P4TypeRefAnnotator implements Annotator {
 
     private Set<String> getIncludedFiles(PsiFile sourceFile) {
         Set<String> result = Sets.newHashSet();
-        P4LangProgram p4LangProgram = PsiTreeUtil.getChildOfType(sourceFile, P4LangProgram.class);
-        if (p4LangProgram == null) {
-            return result;
-        }
-        for (P4LangPreProcessDeclaration preProcess : p4LangProgram.getPreProcessDeclarationList()) {
-            if (P4LangParserUtil.isInclude(preProcess)) {
-                String includeFileName = P4LangParserUtil.getIncludeFile(preProcess);
+        Collection<PsiComment> comments = PsiTreeUtil.findChildrenOfType(sourceFile, PsiComment.class);
+        for (PsiComment comment : comments) {
+            if (P4LangParserUtil.isInclude(comment)) {
+                String includeFileName = P4LangParserUtil.getIncludeFile(comment);
                 if (includeFileName != null && !includeFileName.isEmpty()) {
                     result.add(includeFileName);
                 }

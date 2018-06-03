@@ -25,7 +25,7 @@ public class P4LangParserDefinition implements ParserDefinition {
 
     public static final TokenSet STRING_LITERALS = TokenSet.create(P4LangTypes.STRING_LITERAL);
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-    public static final TokenSet COMMENTS = TokenSet.create(P4LangTypes.COMMENT);
+    public static final TokenSet COMMENTS = TokenSet.create(P4LangTypes.COMMENT, P4LangTypes.PRE_PROCESS);
 
     public P4LangParserDefinition() {
         log.info("P4LangParserDefinition Created");
@@ -68,17 +68,7 @@ public class P4LangParserDefinition implements ParserDefinition {
     @NotNull
     @Override
     public PsiElement createElement(ASTNode node) {
-        if (node.getElementType().equals(P4LangTypes.TYPEDEF_DECLARATION)) {
-            rememberTypeDef(node);
-        }
         return P4LangTypes.Factory.createElement(node);
-    }
-
-    private void rememberTypeDef(ASTNode node) {
-        ASTNode nameNode = node.findChildByType(P4LangTypes.NAME_);
-        if (nameNode != null) {
-            String typeName = nameNode.getText();
-        }
     }
 
     @Override
