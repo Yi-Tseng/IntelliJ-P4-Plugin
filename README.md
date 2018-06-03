@@ -5,13 +5,10 @@ Currently supported:
  - Syntax highlighting
  - Grammer check
  - P4 Module support (Module, SDK...)
+ - P4 settings (Include paths setting)
+ - Basic type check (from include path)
 
 Working in progress:
- - P4 settings (Compiler path, include paths....)
- - TypeRef check
-
-TODO:
- - P4 Build support
  - Code completed
 
 Screenshot:

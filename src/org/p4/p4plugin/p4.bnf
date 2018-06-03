@@ -33,7 +33,8 @@ tokens ::= [
 ]
 
 program
-program ::= (PRE_PROCESS | declaration)*
+program ::= (preProcessDeclaration | declaration)*
+preProcessDeclaration::= PRE_PROCESS {methods=[isInclude isGlobalInclude getIncludeFile]}
 declaration ::= typeDeclaration
            | externDeclaration
            | actionDeclaration
@@ -57,7 +58,7 @@ annotation::= AT name_ L_PAREN expressionList_? R_PAREN | AT name_
 parameterList_::= nonEmptyParameterList_?
 nonEmptyParameterList_::= parameter (COMMA parameter)*
 
-parameter::= optAnnotations direction? typeRef name_
+parameter::= optAnnotations direction? typeRef optTypeParameters? name_
 direction::= IN
          | OUT
          | INOUT
@@ -117,9 +118,11 @@ externDeclaration::= optAnnotations EXTERN nonTypeName  optTypeParameters?  L_BR
                  | optAnnotations EXTERN name_ SEMICOLON
 methodPrototypes::= (methodPrototype)*
 functionPrototype::= typeOrVoid name_ optTypeParameters?  L_PAREN parameterList_ R_PAREN
-methodPrototype::= optAnnotations functionPrototype SEMICOLON
+methodPrototype::= optAnnotations constructorPrototype SEMICOLON
+               | optAnnotations functionPrototype SEMICOLON
                | optAnnotations ABSTRACT functionPrototype SEMICOLON
                | optAnnotations TYPE L_PAREN parameterList_ R_PAREN SEMICOLON
+constructorPrototype::= name_ optTypeParameters?  L_PAREN parameterList_ R_PAREN
 typeRef::= baseType
        | typeName
        | specializedType
