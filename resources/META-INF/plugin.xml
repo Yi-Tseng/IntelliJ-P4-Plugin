@@ -11,7 +11,7 @@
   <change-notes><![CDATA[
       <p>0.1 - Initial P4 syntax highlight support</p></br>
       <p>0.2 - Initial P4 grammar support</p></br>
-      <p>0.3 - P4 Module, Project, File template support</p></br>
+      <p>0.3 - P4 Module, Project, File template, and type check support</p></br>
     ]]>
   </change-notes>
 
