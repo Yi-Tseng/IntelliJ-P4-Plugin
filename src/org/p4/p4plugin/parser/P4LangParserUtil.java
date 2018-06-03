@@ -36,13 +36,18 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
                 comment.getText().contains("include");
     }
 
-    public static String getIncludeFile(PsiComment preProcess) {
+    public static String getGlobalIncludeFile(PsiComment preProcess) {
         String text = preProcess.getText();
         Matcher matcher = GLOBAL_INC_FILE.matcher(text);
         if (matcher.find()) {
             return matcher.group(1);
         }
-        matcher = LOCAL_INC_FILE.matcher(text);
+        return null;
+    }
+
+    public static String getLocalIncludeFile(PsiComment preProcess) {
+        String text = preProcess.getText();
+        Matcher matcher = LOCAL_INC_FILE.matcher(text);
         if (matcher.find()) {
             return matcher.group(1);
         }
@@ -69,6 +74,7 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
             }
 
             for (P4LangDeclaration declaration : declarations) {
+                /* Externs */
                 if (declaration.getFirstChild() instanceof P4LangExternDeclaration) {
 
                     P4LangExternDeclaration externDeclaration = (P4LangExternDeclaration) declaration.getFirstChild();
@@ -92,6 +98,8 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
                         continue;
                     }
                 }
+
+                /* TypeDef */
                 if (declaration.getFirstChild() instanceof P4LangTypeDeclaration) {
                     P4LangTypeDeclaration typeDeclaration = (P4LangTypeDeclaration) declaration.getFirstChild();
                     PsiElement child = typeDeclaration.getFirstChild();
@@ -111,6 +119,8 @@ public class P4LangParserUtil extends GeneratedParserUtilBase {
                         result.add(nameChild.getText());
                     }
                 }
+
+                /* Packages */
                 if (declaration.getFirstChild() instanceof P4LangPackageTypeDeclaration) {
                     log.info("Package {}");
                     P4LangPackageTypeDeclaration packageTypeDeclaration =
