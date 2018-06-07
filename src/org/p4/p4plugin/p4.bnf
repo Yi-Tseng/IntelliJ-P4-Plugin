@@ -186,8 +186,8 @@ emptyStatement::= SEMICOLON
 exitStatement::= EXIT SEMICOLON
 returnStatement::= RETURN SEMICOLON
                | RETURN expression SEMICOLON
-conditionalStatement::= IF L_PAREN expression R_PAREN statement
-                    | IF L_PAREN expression R_PAREN statement ELSE statement
+conditionalStatement::= IF L_PAREN expression R_PAREN statement ELSE statement
+                    | IF L_PAREN expression R_PAREN statement
 directApplication::= typeName DOT APPLY L_PAREN argumentList_? R_PAREN SEMICOLON
 statement::= assignmentOrMethodCallStatement
          | directApplication
