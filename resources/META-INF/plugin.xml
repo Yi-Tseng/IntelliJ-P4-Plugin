@@ -11,7 +11,7 @@
   <change-notes><![CDATA[
       <p>0.1 - Initial P4 syntax highlight support</p></br>
       <p>0.2 - Initial P4 grammar support</p></br>
-      <p>0.3 - P4 Module, Project, File template, and type check support</p></br>
+      <p>0.3 - P4 Module, Project, File template</p></br>
     ]]>
   </change-notes>
 
@@ -34,7 +34,7 @@
                                    implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
     <lang.commenter implementationClass="org.p4.p4plugin.P4Commenter" />
-    <annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4TypeRefAnnotator" />
+    <!--<annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4TypeRefAnnotator" />-->
 
     <!-- Modules -->
     <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
