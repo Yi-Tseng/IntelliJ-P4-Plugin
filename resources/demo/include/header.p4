@@ -1,4 +1,4 @@
-#ifdef _HEADER_P4_
+#ifndef _HEADER_P4_
 #define _HEADER_P4_
 
 @controller_header("packet_in")
