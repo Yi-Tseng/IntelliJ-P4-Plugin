@@ -45,7 +45,7 @@ public class P4LangColorSettingPage implements ColorSettingsPage {
     @NotNull
     @Override
     public String getDemoText() {
-        URL url = getClass().getResource("/demo.p4");
+        URL url = getClass().getResource("/demo/demo.p4");
         try {
             return Resources.toString(url, Charsets.UTF_8);
         } catch (IOException e) {
