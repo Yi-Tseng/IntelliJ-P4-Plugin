@@ -40,6 +40,7 @@
     <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
     <moduleType id="P4_MODULE" implementationClass="org.p4.p4plugin.module.P4ModuleType"/>
     <facetType implementation="org.p4.p4plugin.module.facet.P4FacetType" />
+    <moduleConfigurationEditorProvider implementation="org.p4.p4plugin.module.P4ModuleConfigurationEditorProvider"/>
 
     <!-- Wizard -->
     <moduleBuilder builderClass="org.p4.p4plugin.module.P4ModuleBuilder" id="P4_STEP" order="first"/>
