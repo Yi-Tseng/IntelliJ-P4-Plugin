@@ -23,8 +23,6 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
             .add(P4LangTypes.ACTION)
             .add(P4LangTypes.ACTIONS)
             .add(P4LangTypes.APPLY)
-            .add(P4LangTypes.BOOL)
-            .add(P4LangTypes.BIT)
             .add(P4LangTypes.CONST)
             .add(P4LangTypes.CONTROL)
             .add(P4LangTypes.DEFAULT)
@@ -40,7 +38,6 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
             .add(P4LangTypes.IF)
             .add(P4LangTypes.IN)
             .add(P4LangTypes.INOUT)
-            .add(P4LangTypes.INT)
             .add(P4LangTypes.KEY)
             .add(P4LangTypes.MATCH_KIND)
             .add(P4LangTypes.OUT)
@@ -57,6 +54,12 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
             .add(P4LangTypes.TRUE)
             .add(P4LangTypes.TUPLE)
             .add(P4LangTypes.TYPEDEF)
+            .build();
+
+    private static final Set<IElementType> P4LANG_BUILTIN_TYPE = ImmutableSet.<IElementType>builder()
+            .add(P4LangTypes.BOOL)
+            .add(P4LangTypes.BIT)
+            .add(P4LangTypes.INT)
             .add(P4LangTypes.VARBIT)
             .add(P4LangTypes.VOID)
             .build();
@@ -136,6 +139,10 @@ public class P4LangSyntaxHighlighter extends SyntaxHighlighterBase {
 
         if (P4LANG_KEYWORDS.contains(iElementType)) {
             return new TextAttributesKey[]{P4LANG_KEYWORD};
+        }
+
+        if (P4LANG_BUILTIN_TYPE.contains(iElementType)) {
+            return new TextAttributesKey[]{P4LANG_TYPE};
         }
         TextAttributesKey key = P4LANG_ATTR_KEYS.get(iElementType);
         if (key == null) {
