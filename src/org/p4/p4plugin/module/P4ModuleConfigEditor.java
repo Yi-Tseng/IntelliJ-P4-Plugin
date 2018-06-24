@@ -22,6 +22,7 @@ public class P4ModuleConfigEditor extends ModuleElementsEditor {
     private JPanel mainPanel;
     private JTextField textField1;
     private JTextField textField2;
+    private JTextField textField3;
 
     protected P4ModuleConfigEditor(@NotNull ModuleConfigurationState moduleConfigurationState) {
         super(moduleConfigurationState);
