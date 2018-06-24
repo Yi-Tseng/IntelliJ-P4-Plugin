@@ -12,6 +12,6 @@ public class P4LangTabbedCodeStylePanel extends TabbedLanguageCodeStylePanel {
 
     @Override
     protected void initTabs(CodeStyleSettings codeStyleSettings) {
-        addSpacesTab(codeStyleSettings);
+        addIndentOptionsTab(codeStyleSettings);
     }
 }

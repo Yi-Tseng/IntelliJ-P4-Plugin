@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.p4.p4plugin.P4Lang;
 
-public class P4LangCodeStyleSettingProvider extends CodeStyleSettingsProvider {
+public class P4CodeStyleSettingProvider extends CodeStyleSettingsProvider {
     @NotNull
     @Override
     public Configurable createSettingsPage(CodeStyleSettings settings,

@@ -35,7 +35,8 @@
     <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
     <lang.commenter implementationClass="org.p4.p4plugin.P4Commenter" />
     <annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4LangAnnotator" />
-    <codeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4LangCodeStyleSettingProvider" />
+    <codeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4CodeStyleSettingProvider" />
+    <langCodeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4LangCodeStyleSettingsProvider" />
 
     <!-- Modules -->
     <sdkType implementation="org.p4.p4plugin.module.P4SdkType" />
