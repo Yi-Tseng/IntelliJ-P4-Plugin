@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-public class P4TypeRefAnnotator implements Annotator {
-    private static final Logger log = LoggerFactory.getLogger(P4TypeRefAnnotator.class);
+public class P4LangAnnotator implements Annotator {
+    private static final Logger log = LoggerFactory.getLogger(P4LangAnnotator.class);
 
     @Override
     public void annotate(@NotNull PsiElement psiElement,
