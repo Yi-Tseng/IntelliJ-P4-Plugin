@@ -8,7 +8,6 @@ import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.CompilerModuleExtension;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModifiableRootModel;
@@ -32,7 +31,6 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
     private static final String P4_MODULE_BUILDER_ID = "P4_MODULE_BUILDER";
     private final Logger log = LoggerFactory.getLogger(getClass());
     private List<Pair<String, String>> sourcePaths;
-    private Sdk p4Sdk;
 
     public P4ModuleBuilder() {
         addListener(this);
@@ -66,18 +64,14 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
 
     @Override
     public ModuleWizardStep[] createWizardSteps(@NotNull WizardContext wizardContext, @NotNull ModulesProvider modulesProvider) {
-        return new ModuleWizardStep[]{new P4ModuleWizardStep(this)};
+        return new ModuleWizardStep[]{};
     }
 
     @Override
     public void setupRootModel(ModifiableRootModel rootModel) throws ConfigurationException {
         final CompilerModuleExtension compilerModuleExtension = rootModel.getModuleExtension(CompilerModuleExtension.class);
         compilerModuleExtension.setExcludeOutput(true);
-        if (p4Sdk != null){
-            rootModel.setSdk(p4Sdk);
-        } else {
-            rootModel.inheritSdk();
-        }
+        rootModel.inheritSdk();
 
         ContentEntry contentEntry = doAddContentEntry(rootModel);
         if (contentEntry != null) {
@@ -95,10 +89,6 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
                 }
             }
         }
-    }
-
-    public void setP4Sdk(Sdk p4Sdk) {
-        this.p4Sdk = p4Sdk;
     }
 
     @Override

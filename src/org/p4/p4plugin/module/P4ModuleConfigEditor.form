@@ -30,7 +30,7 @@
               <text value="Default include paths"/>
             </properties>
           </component>
-          <component id="71c86" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+          <component id="71c86" class="javax.swing.JTextField" binding="includePaths">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -54,10 +54,10 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="p4c compiler path"/>
+              <text value="P4 compiler path"/>
             </properties>
           </component>
-          <component id="84332" class="javax.swing.JTextField" binding="textField2" default-binding="true">
+          <component id="84332" class="javax.swing.JTextField" binding="compilerPath">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -81,10 +81,10 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="P4 preprocessor args"/>
+              <text value="P4 compiler arguments"/>
             </properties>
           </component>
-          <component id="ae241" class="javax.swing.JTextField" binding="textField3" default-binding="true">
+          <component id="ae241" class="javax.swing.JTextField" binding="compilerArgs">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
