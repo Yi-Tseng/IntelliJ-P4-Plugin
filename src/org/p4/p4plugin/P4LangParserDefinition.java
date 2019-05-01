@@ -25,6 +25,10 @@ public class P4LangParserDefinition implements ParserDefinition {
 
     public static final TokenSet STRING_LITERALS = TokenSet.create(P4LangTypes.STRING_LITERAL);
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
+
+    // Note: we treat any preprocessor statements (e.g., #include, #define, ...) as a comment
+    // since the parser should not have the logic to precess them.
+    // TODO: However, we still need to process some of them (e.g., find symbols from include files)
     public static final TokenSet COMMENTS = TokenSet.create(P4LangTypes.COMMENT, P4LangTypes.PRE_PROCESS);
 
     public P4LangParserDefinition() {
@@ -73,12 +77,6 @@ public class P4LangParserDefinition implements ParserDefinition {
 
     @Override
     public PsiFile createFile(FileViewProvider viewProvider) {
-//        P4PreprocessorUtil.preprocessP4File(viewProvider.getVirtualFile());
         return new P4LangFile(viewProvider);
-    }
-
-    @Override
-    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
-        return SpaceRequirements.MAY;
     }
 }
