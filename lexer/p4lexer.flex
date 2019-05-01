@@ -63,8 +63,9 @@ private Logger log = LoggerFactory.getLogger(getClass());
 <STRING>\\\"    {  }
 <STRING>\\\\    {  }
 <STRING>\"      { yybegin(YYINITIAL); return P4LangTypes.STRING_LITERAL; }
+<STRING>\n      { yybegin(YYINITIAL); return P4LangTypes.UNEXPECTED_TOKEN; }
+<STRING><<EOF>> { yybegin(YYINITIAL); return P4LangTypes.UNEXPECTED_TOKEN; }
 <STRING>.       {  }
-<STRING>\n      {  }
 
 
 "abstract"      { yybegin(NORMAL); return P4LangTypes.ABSTRACT; }
