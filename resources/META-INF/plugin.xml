@@ -38,6 +38,7 @@
     <annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4LangAnnotator" />
     <codeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4CodeStyleSettingProvider" />
     <langCodeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4LangCodeStyleSettingsProvider" />
+    <completion.contributor language="P4Lang" implementationClass="org.p4.p4plugin.completion.P4LangKeywordCompletionContributor"/>
 
     <!-- Modules -->
     <moduleType id="P4_MODULE" implementationClass="org.p4.p4plugin.module.P4ModuleType"/>
