@@ -28,6 +28,14 @@ hs_err_pid*
 *.java~
 idea-flex.skeleton
 
+# Plugin files
 out/*
 gen
 *.iml
+
+# gradle files
+build.gradle
+.gradle
+IntelliJ-P4-Plugin.ipr
+IntelliJ-P4-Plugin.iws
+build

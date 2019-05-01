@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.4.8"
+}
+
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'java'
+
+intellij {
+    version 'IC-2018.3'
+    pluginName 'P4 Plugin'
+}
+
+sourceSets {
+    main {
+      java.srcDirs 'src', 'gen'
+      resources.srcDirs 'resources', 'pluginResources'
+    }
+}
+
+group 'org.p4.p4plugin'
+version '0.3' // Plugin version
