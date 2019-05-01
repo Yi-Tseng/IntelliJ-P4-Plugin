@@ -13,7 +13,6 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.p4.p4plugin.parser.P4LangParser;
-import org.p4.p4plugin.preprocessor.P4PreprocessorUtil;
 import org.p4.p4plugin.psi.P4LangFile;
 import org.p4.p4plugin.psi.P4LangTypes;
 import org.slf4j.Logger;
