@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.p4.p4plugin</id>
   <name>P4 Plugin</name>
-  <version>0.3</version>
+  <version>0.4</version>
   <vendor email="yi@p4tw.org" url="p4tw.org">Yi Tseng</vendor>
 
   <description><![CDATA[
@@ -12,6 +12,7 @@
       <p>0.1 - Initial P4 syntax highlight support</p></br>
       <p>0.2 - Initial P4 grammar support</p></br>
       <p>0.3 - P4 Module, Project, File template</p></br>
+      <p>0.4 - Minor fixes</p></br>
     ]]>
   </change-notes>
 
@@ -60,9 +61,5 @@
   </actions>
 
   <project-components>
-    <component>
-      <implementation-class>org.p4.p4plugin.P4Plugin
-      </implementation-class>
-    </component>
   </project-components>
 </idea-plugin>

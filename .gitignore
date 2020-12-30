@@ -34,8 +34,10 @@ gen
 *.iml
 
 # gradle files
-build.gradle
 .gradle
 IntelliJ-P4-Plugin.ipr
 IntelliJ-P4-Plugin.iws
 build
+
+# MacOS
+.DS_Store

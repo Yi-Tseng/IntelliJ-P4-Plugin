@@ -3,7 +3,6 @@ package org.p4.p4plugin.module;
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.ModuleBuilderListener;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
-import com.intellij.ide.util.projectWizard.SourcePathsBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
@@ -16,8 +15,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.p4.p4plugin.icon.P4LangIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder, ModuleBuilderListener {
+public class P4ModuleBuilder extends ModuleBuilder implements ModuleBuilderListener {
     private static final String P4_MODULE_BUILDER_ID = "P4_MODULE_BUILDER";
     private final Logger log = LoggerFactory.getLogger(getClass());
     private List<Pair<String, String>> sourcePaths;
@@ -36,7 +33,6 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
         addListener(this);
     }
 
-    @Nullable
     @Override
     public String getBuilderId() {
         return P4_MODULE_BUILDER_ID;
@@ -63,18 +59,19 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
     }
 
     @Override
-    public ModuleWizardStep[] createWizardSteps(@NotNull WizardContext wizardContext, @NotNull ModulesProvider modulesProvider) {
+    public ModuleWizardStep[] createWizardSteps(WizardContext wizardContext, ModulesProvider modulesProvider) {
         return new ModuleWizardStep[]{};
     }
 
     @Override
-    public void setupRootModel(ModifiableRootModel rootModel) throws ConfigurationException {
+    public void setupRootModel(ModifiableRootModel rootModel) {
         final CompilerModuleExtension compilerModuleExtension = rootModel.getModuleExtension(CompilerModuleExtension.class);
         compilerModuleExtension.setExcludeOutput(true);
         rootModel.inheritSdk();
 
         ContentEntry contentEntry = doAddContentEntry(rootModel);
         if (contentEntry != null) {
+
             final List<Pair<String,String>> sourcePaths = getSourcePaths();
 
             if (sourcePaths != null) {
@@ -97,11 +94,10 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
     }
 
     @Override
-    public void moduleCreated(@NotNull Module module) {
+    public void moduleCreated(Module module) {
     }
 
-    @Override
-    public List<Pair<String, String>> getSourcePaths() throws ConfigurationException {
+    public List<Pair<String, String>> getSourcePaths() {
         if (sourcePaths == null) {
             sourcePaths = new ArrayList<>();
             String path = getContentEntryPath() + File.separator + "src";
@@ -111,7 +107,6 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
         return sourcePaths;
     }
 
-    @Override
     public void setSourcePaths(List<Pair<String, String>> sourcePaths) {
         if (sourcePaths == null) {
             this.sourcePaths = null;
@@ -120,7 +115,6 @@ public class P4ModuleBuilder extends ModuleBuilder implements SourcePathsBuilder
         }
     }
 
-    @Override
     public void addSourcePath(Pair<String, String> path) {
         if (this.sourcePaths == null) {
             this.sourcePaths = new ArrayList<>();

@@ -7,6 +7,7 @@ import org.p4.p4plugin.icon.P4LangIcon;
 
 import javax.swing.*;
 
+
 /**
  * P4 Language type
  */
