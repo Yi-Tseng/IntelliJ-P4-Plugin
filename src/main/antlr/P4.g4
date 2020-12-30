@@ -1,3 +1,7 @@
+
+// Notice: originally from p4-vscode-extension, with some modificaiton.
+// https://github.com/fattaholmanan/p4-vscode-extension
+
 grammar P4;
 
 start : program;
@@ -26,26 +30,31 @@ declaration
 preprocessorLine
 	: PREPROC_INCLUDE ppIncludeFileName
 	| PREPROC_DEFINE
+	| PREPROC_DEFINE expression
 	| PREPROC_DEFINE expression expression
-	| PREPROC_UNDEF
-	| PREPROC_IFDEF
-	| PREPROC_IFNDEF
+	| PREPROC_UNDEF IDENTIFIER
+	| PREPROC_IFDEF IDENTIFIER
+	| PREPROC_IFNDEF IDENTIFIER
 	| PREPROC_IF expression
-	| PREPROC_ELSEIF
+	| PREPROC_ELSEIF expression
 	| PREPROC_ELSE
 	| PREPROC_ENDIF
 	| PREPROC_LINE
+	| PREPROC_CC_LINE
 	;
 
 ppIncludeFileName
 	: STRING_LITERAL
-	| '<' ppIncludeFileName '>'
-	| name
-	| name '.' name
-	| './' ppIncludeFileName
-	| '../' ppIncludeFileName
-	| '/' ppIncludeFileName
+	| '<' ppIncludeFilePath '>'
 	;
+
+ppIncludeFilePath
+    : name
+    | ppIncludeFilePath '.' name
+    | './' ppIncludeFilePath
+    | '../' ppIncludeFilePath
+    | '/' ppIncludeFilePath
+    ;
 
 nonTypeName
     : type_or_id
@@ -916,8 +925,8 @@ UNEXPECTED_TOKEN			: '<*>.|\n';
 
 // added by Ali
 WS 							: [ \t\r\n]+ -> channel(HIDDEN) ;
-COMMENT 					: '/*' .*? '*/' -> skip ;
-LINE_COMMENT 				: '//' ~[\r\n]* -> skip ;
+COMMENT 					: '/*' .*? '*/' -> channel(HIDDEN) ;
+LINE_COMMENT 				: '//' ~[\r\n]* -> channel(HIDDEN) ;
 fragment ESCAPED_QUOTE 		: '\\"';
 STRING_LITERAL 				: '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
 
@@ -932,6 +941,7 @@ PREPROC_LINE				: '#line';
 PREPROC_IF					: '#if';
 PREPROC_ELSE				: '#else';
 PREPROC_ARG 				: '##'[A-Za-z_][A-Za-z0-9_]* -> channel(HIDDEN) ;
+PREPROC_CC_LINE             : '# ' [0-9]+ STRING_LITERAL [0-9]*? ;
 
 // end of added by Ali
 

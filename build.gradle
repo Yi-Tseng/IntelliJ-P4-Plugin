@@ -26,13 +26,17 @@ wrapper {
 }
 
 compileJava {
-    sourceCompatibility = "1.11"
-    targetCompatibility = "1.11"
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 }
 
 sourceSets {
-    main.antlr.includes = ["p4.g4"]
+    main {
+        java {
+        }
+    }
 }
+
 repositories {
     mavenCentral()
 }
@@ -56,10 +60,9 @@ dependencies {
 
 generateGrammarSource {
     arguments += [
-            "-package", "org.antlr.jetbrains.st4plugin.parsing",
+            "-package", "org.p4.p4plugin.parsing",
             "-long-messages",
             "-no-visitor",
-            "-no-listener",
             "-lib","src/main/antlr"
     ]
 }

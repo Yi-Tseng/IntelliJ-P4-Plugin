@@ -36,6 +36,7 @@ p4-include-path=<your custom P4 include path>
 gradlew buildPlugin
 ```
 
+After build, you will get the plugin zip file in `build/distributions/` 
 
 
 ## Screenshot:

@@ -1,5 +1,7 @@
 package org.p4.p4plugin;
 
+import com.intellij.openapi.fileTypes.FileTypeConsumer;
+import com.intellij.openapi.fileTypes.FileTypeFactory;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,5 +43,13 @@ public class P4LangFileType extends LanguageFileType {
     @Override
     public Icon getIcon() {
         return P4LangIcon.ICON;
+    }
+
+    static class Factory extends FileTypeFactory {
+
+        @Override
+        public void createFileTypes(@NotNull FileTypeConsumer consumer) {
+            consumer.consume(INSTANCE, "p4");
+        }
     }
 }

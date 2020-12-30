@@ -5,5 +5,5 @@ import com.intellij.openapi.util.IconLoader;
 import javax.swing.Icon;
 
 public class P4LangIcon {
-    public static final Icon ICON = IconLoader.findIcon("p4-icon.png");
+    public static final Icon ICON = IconLoader.findIcon("/p4-icon.png");
 }

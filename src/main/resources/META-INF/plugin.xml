@@ -1,18 +1,19 @@
 <idea-plugin>
   <id>org.p4.p4plugin</id>
-  <name>P4 Plugin</name>
+  <name>P4 Language Support</name>
   <version>0.4</version>
   <vendor email="yi@p4tw.org" url="p4tw.org">Yi Tseng</vendor>
 
   <description><![CDATA[
-      Plugin for P4 language
+      Plugin for P4 Language
+      Includes syntax highlighting and simple grammar check.
     ]]></description>
 
   <change-notes><![CDATA[
       <p>0.1 - Initial P4 syntax highlight support</p></br>
       <p>0.2 - Initial P4 grammar support</p></br>
       <p>0.3 - P4 Module, Project, File template</p></br>
-      <p>0.4 - Minor fixes</p></br>
+      <p>1.0 - Bump IDE version to 2020.2 and use AntlrV4 grammar</p></br>
     ]]>
   </change-notes>
 
@@ -28,30 +29,22 @@
   <extensions defaultExtensionNs="com.intellij">
 
     <!-- Language support -->
-    <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileTypeFactory" />
-    <lang.parserDefinition language="P4Lang"
-                           implementationClass="org.p4.p4plugin.P4LangParserDefinition" />
-    <lang.syntaxHighlighterFactory language="P4Lang"
-                                   implementationClass="org.p4.p4plugin.P4LangSyntaxHighlighterFactory" />
-    <colorSettingsPage implementation="org.p4.p4plugin.P4LangColorSettingPage" />
+    <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileType$Factory" />
     <lang.commenter language="P4Lang"
                     implementationClass="org.p4.p4plugin.P4Commenter" />
     <annotator language="P4Lang" implementationClass="org.p4.p4plugin.P4LangAnnotator" />
-    <codeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4CodeStyleSettingProvider" />
-    <langCodeStyleSettingsProvider implementation="org.p4.p4plugin.style.P4LangCodeStyleSettingsProvider" />
     <completion.contributor language="P4Lang" implementationClass="org.p4.p4plugin.completion.P4LangKeywordCompletionContributor"/>
+    <lang.parserDefinition language="P4Lang" implementationClass="org.p4.p4plugin.psi.P4ParserDefinition" />
+    <editorHighlighterProvider filetype="P4 Language" implementationClass="org.p4.p4plugin.highlight.P4EditorHighlighterProvider" />
+    <lang.syntaxHighlighterFactory language="P4Lang" implementationClass="org.p4.p4plugin.highlight.P4SyntaxHighlighter$Factory" />
 
-    <!-- Modules -->
-    <moduleType id="P4_MODULE" implementationClass="org.p4.p4plugin.module.P4ModuleType"/>
-
-    <moduleConfigurationEditorProvider implementation="org.p4.p4plugin.module.P4ModuleConfigurationEditorProvider"/>
-
-    <!-- Wizard -->
-    <moduleBuilder builderClass="org.p4.p4plugin.module.P4ModuleBuilder" id="P4_STEP" order="first"/>
 
     <!-- File Templates -->
     <internalFileTemplate name="empty" />
     <internalFileTemplate name="v1switch" />
+
+    <!-- Style -->
+    <colorSettingsPage implementation="org.p4.p4plugin.highlight.P4ColorSettingsPage" />
   </extensions>
 
   <actions>
