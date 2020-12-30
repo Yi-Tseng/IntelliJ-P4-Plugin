@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>org.p4.p4plugin</id>
   <name>P4 Language Support</name>
-  <version>0.4</version>
+  <version>1.0</version>
   <vendor email="yi@p4tw.org" url="p4tw.org">Yi Tseng</vendor>
 
   <description><![CDATA[

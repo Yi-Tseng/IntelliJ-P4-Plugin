@@ -24,36 +24,6 @@ declaration
     | errorDeclaration
     | matchKindDeclaration
     | functionDeclaration
-	| preprocessorLine
-    ;
-
-preprocessorLine
-	: PREPROC_INCLUDE ppIncludeFileName
-	| PREPROC_DEFINE
-	| PREPROC_DEFINE expression
-	| PREPROC_DEFINE expression expression
-	| PREPROC_UNDEF IDENTIFIER
-	| PREPROC_IFDEF IDENTIFIER
-	| PREPROC_IFNDEF IDENTIFIER
-	| PREPROC_IF expression
-	| PREPROC_ELSEIF expression
-	| PREPROC_ELSE
-	| PREPROC_ENDIF
-	| PREPROC_LINE
-	| PREPROC_CC_LINE
-	;
-
-ppIncludeFileName
-	: STRING_LITERAL
-	| '<' ppIncludeFilePath '>'
-	;
-
-ppIncludeFilePath
-    : name
-    | ppIncludeFilePath '.' name
-    | './' ppIncludeFilePath
-    | '../' ppIncludeFilePath
-    | '/' ppIncludeFilePath
     ;
 
 nonTypeName
@@ -818,8 +788,6 @@ expression
 	| '(' typeRef ')' expression // %prec PREFIX
     ;
 
-
-/* Added by Ali */
 type_or_id
 	: IDENTIFIER
 	| TYPE_IDENTIFIER
@@ -832,6 +800,36 @@ parserStateCondition
 	| keysetExpression '==' expression
 	| '(' keysetExpression ')' '==' expression
 	;
+
+// Old rules
+//preprocessorLine
+//	: PREPROC_INCLUDE ppIncludeFileName
+//	| PREPROC_DEFINE
+//	| PREPROC_DEFINE expression
+//	| PREPROC_DEFINE expression expression
+//	| PREPROC_UNDEF IDENTIFIER
+//	| PREPROC_IFDEF IDENTIFIER
+//	| PREPROC_IFNDEF IDENTIFIER
+//	| PREPROC_IF expression
+//	| PREPROC_ELSEIF expression
+//	| PREPROC_ELSE
+//	| PREPROC_ENDIF
+//	| PREPROC_LINE
+//	| PREPROC_CC_LINE
+//	;
+//
+//ppIncludeFileName
+//	: STRING_LITERAL
+//	| '<' ppIncludeFilePath '>'
+//	;
+//
+//ppIncludeFilePath
+//    : name
+//    | ppIncludeFilePath '.' name
+//    | './' ppIncludeFilePath
+//    | '../' ppIncludeFilePath
+//    | '/' ppIncludeFilePath
+//    ;
 
 /* ******* */
 /*  LEXER  */
@@ -883,7 +881,6 @@ VALUESET					: 'value_set';
 VOID						: 'void';
 DONTCARE					: '_';
 
-
 MASK						: '&&&';
 RANGE						: '..';
 SHL							: '<<';
@@ -923,33 +920,30 @@ SEMICOLON					: ';';
 AT							: '@';
 UNEXPECTED_TOKEN			: '<*>.|\n';
 
-// added by Ali
 WS 							: [ \t\r\n]+ -> channel(HIDDEN) ;
 COMMENT 					: '/*' .*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT 				: '//' ~[\r\n]* -> channel(HIDDEN) ;
 fragment ESCAPED_QUOTE 		: '\\"';
 STRING_LITERAL 				: '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
 
-PREPROC_INCLUDE				: '#include';
-PREPROC_DEFINE				: '#define';
-PREPROC_UNDEF				: '#undef';
-PREPROC_IFDEF				: '#ifdef';
-PREPROC_IFNDEF				: '#ifndef';
-PREPROC_ELSEIF				: '#elseif';
-PREPROC_ENDIF				: '#endif';
-PREPROC_LINE				: '#line';
-PREPROC_IF					: '#if';
-PREPROC_ELSE				: '#else';
-PREPROC_ARG 				: '##'[A-Za-z_][A-Za-z0-9_]* -> channel(HIDDEN) ;
-PREPROC_CC_LINE             : '# ' [0-9]+ STRING_LITERAL [0-9]*? ;
+// All preprocessor statements will be ignored in the lexer and the parser
+PREPROCESSSOR             : '#' ~[\r\n]* -> channel(HIDDEN);
 
-// end of added by Ali
+// Old rules
+//PREPROC_INCLUDE				: '#include';
+//PREPROC_DEFINE				: '#define';
+//PREPROC_UNDEF				: '#undef';
+//PREPROC_IFDEF				: '#ifdef';
+//PREPROC_IFNDEF				: '#ifndef';
+//PREPROC_ELSEIF				: '#elseif';
+//PREPROC_ENDIF				: '#endif';
+//PREPROC_LINE				: '#line';
+//PREPROC_IF					: '#if';
+//PREPROC_ELSE				: '#else';
+//PREPROC_ARG 				: '##'[A-Za-z_][A-Za-z0-9_]* -> channel(HIDDEN) ;
 
 IDENTIFIER					: [A-Za-z_][A-Za-z0-9_]*;
 TYPE_IDENTIFIER				: [A-Za-z_][A-Za-z0-9_]*;
-
-
-// Ali: we should change! Integer and Identifier!
 
 INTEGER						: HEX_INTEGER
 							| DEC_INTEGER

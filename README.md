@@ -27,13 +27,19 @@ p4-include-path=<your custom P4 include path>
 ### Create idea project file
 
 ```
-./gradlew idea
+gradle idea
+```
+
+### Debug the plugin with IDE
+
+```
+gradle runIde
 ```
 
 ### Build the plugin
 
 ```
-gradlew buildPlugin
+gradle buildPlugin [-PideaVersion=2019.3]
 ```
 
 After build, you will get the plugin zip file in `build/distributions/` 
