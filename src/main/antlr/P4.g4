@@ -437,9 +437,9 @@ baseType
     | BIT '<' INTEGER '>'
     | INT '<' INTEGER '>'
     | VARBIT '<' INTEGER '>'
-    | BIT '<' '(' expression ')' '>'
-    | INT '<' '(' expression ')' '>'
-    | VARBIT '<' '(' expression ')' '>'
+    | BIT '<' expression '>'
+    | INT '<' expression '>'
+    | VARBIT '<' expression '>'
     ;
 
 typeOrVoid
@@ -930,17 +930,16 @@ STRING_LITERAL 				: '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
 PREPROCESSSOR             : '#' ~[\r\n]* -> channel(HIDDEN);
 
 // Old rules
-//PREPROC_INCLUDE				: '#include';
-//PREPROC_DEFINE				: '#define';
+//PREPROC_INCLUDE			: '#include';
+//PREPROC_DEFINE			: '#define';
 //PREPROC_UNDEF				: '#undef';
 //PREPROC_IFDEF				: '#ifdef';
-//PREPROC_IFNDEF				: '#ifndef';
-//PREPROC_ELSEIF				: '#elseif';
+//PREPROC_IFNDEF			: '#ifndef';
+//PREPROC_ELSEIF			: '#elseif';
 //PREPROC_ENDIF				: '#endif';
 //PREPROC_LINE				: '#line';
-//PREPROC_IF					: '#if';
+//PREPROC_IF				: '#if';
 //PREPROC_ELSE				: '#else';
-//PREPROC_ARG 				: '##'[A-Za-z_][A-Za-z0-9_]* -> channel(HIDDEN) ;
 
 IDENTIFIER					: [A-Za-z_][A-Za-z0-9_]*;
 TYPE_IDENTIFIER				: [A-Za-z_][A-Za-z0-9_]*;

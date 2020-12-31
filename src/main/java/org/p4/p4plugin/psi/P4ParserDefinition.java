@@ -16,6 +16,7 @@ import org.antlr.intellij.adaptor.lexer.ANTLRLexerAdaptor;
 import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory;
 import org.antlr.intellij.adaptor.parser.ANTLRParserAdaptor;
 import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
@@ -25,8 +26,8 @@ import org.p4.p4plugin.parsing.P4Parser;
 
 public class P4ParserDefinition implements ParserDefinition {
     public static final IFileElementType FILE = new IFileElementType(P4Lang.INSTANCE);
+
     public P4ParserDefinition() {
-        System.err.println("Construct!");
         PSIElementTypeFactory.defineLanguageIElementTypes(
                 P4Lang.INSTANCE,
                 P4Lexer.tokenNames,
@@ -36,7 +37,13 @@ public class P4ParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull Lexer createLexer(Project project) {
-        return new ANTLRLexerAdaptor(P4Lang.INSTANCE, new P4Lexer(null));
+        return new ANTLRLexerAdaptor(P4Lang.INSTANCE, new P4Lexer(null)) {
+            @Override
+            public void advance() {
+                // TODO: Process preprocessor token(collect define, include files, macros...)
+                super.advance();
+            }
+        };
     }
 
     @Override
@@ -59,12 +66,16 @@ public class P4ParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getCommentTokens() {
-        return PSIElementTypeFactory.createTokenSet(P4Lang.INSTANCE, P4Lexer.COMMENT, P4Lexer.LINE_COMMENT);
+        IElementType commentType = P4LangTokenType.getTokenElementType(P4Lexer.COMMENT);
+        IElementType lineCommentType = P4LangTokenType.getTokenElementType(P4Lexer.LINE_COMMENT);
+        IElementType preprocessorType = P4LangTokenType.getTokenElementType(P4Lexer.PREPROCESSSOR);
+        return TokenSet.create(commentType, lineCommentType, preprocessorType);
     }
 
     @Override
     public @NotNull TokenSet getStringLiteralElements() {
-        return PSIElementTypeFactory.createTokenSet(P4Lang.INSTANCE, P4Lexer.STRING_LITERAL);
+        IElementType stringType = P4LangTokenType.getTokenElementType(P4Lexer.STRING_LITERAL);
+        return TokenSet.create(stringType);
     }
 
     @Override
@@ -79,7 +90,8 @@ public class P4ParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getWhitespaceTokens() {
-        return PSIElementTypeFactory.createTokenSet(P4Lang.INSTANCE, P4Lexer.WS);
+        IElementType wsType = P4LangTokenType.getTokenElementType(P4Lexer.WS);
+        return TokenSet.create(wsType);
     }
 
     @Override
