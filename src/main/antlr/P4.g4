@@ -9,9 +9,9 @@ start : program;
 program : input;
 
 input :  /* epsilon */
-	| input declaration
-	| input ';'
-	;
+    | input declaration
+    | input ';'
+    ;
 
 declaration
     : constantDeclaration
@@ -212,12 +212,12 @@ packageTypeDeclaration
     ;
 
 instantiation
-	: annotations typeRef '(' argumentList ')' name ';'
-	| typeRef '(' argumentList ')' name ';'
-	/* experimental */
-	| annotations typeRef '(' argumentList ')' name '=' objInitializer ';'
-	/* experimental */
-	| typeRef '(' argumentList ')' name '=' objInitializer ';'
+    : annotations typeRef '(' argumentList ')' name ';'
+    | typeRef '(' argumentList ')' name ';'
+    /* experimental */
+    | annotations typeRef '(' argumentList ')' name '=' objInitializer ';'
+    /* experimental */
+    | typeRef '(' argumentList ')' name '=' objInitializer ';'
     ;
 
 objInitializer
@@ -352,7 +352,7 @@ controlTypeDeclaration
         CONTROL name
         optTypeParameters
         '(' parameterList ')'
-	;
+    ;
 
 controlLocalDeclarations
     : /* empty */
@@ -671,7 +671,7 @@ entry
 actionBinding
     : lvalue '(' argumentList ')'
     | lvalue '<' typeArgumentList '>' '(' argumentList ')'
-	;
+    ;
 
 entriesList
     : entry
@@ -785,21 +785,21 @@ expression
     // precedence weaker than casts.  There is no easy way to fix this in bison.
     | expression '(' argumentList ')'
     | namedType '(' argumentList ')'
-	| '(' typeRef ')' expression // %prec PREFIX
+    | '(' typeRef ')' expression // %prec PREFIX
     ;
 
 type_or_id
-	: IDENTIFIER
-	| TYPE_IDENTIFIER
+    : IDENTIFIER
+    | TYPE_IDENTIFIER
 ;
 
 parserStateCondition
-	: expression
-	| expression '==' keysetExpression
-	| expression '==' '(' keysetExpression ')'
-	| keysetExpression '==' expression
-	| '(' keysetExpression ')' '==' expression
-	;
+    : expression
+    | expression '==' keysetExpression
+    | expression '==' '(' keysetExpression ')'
+    | keysetExpression '==' expression
+    | '(' keysetExpression ')' '==' expression
+    ;
 
 // Old rules
 //preprocessorLine
@@ -927,31 +927,30 @@ fragment ESCAPED_QUOTE 		: '\\"';
 STRING_LITERAL 				: '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
 
 // All preprocessor statements will be ignored in the lexer and the parser
-PREPROCESSSOR             : '#' ~[\r\n]* -> channel(HIDDEN);
-
-// Old rules
-//PREPROC_INCLUDE			: '#include';
-//PREPROC_DEFINE			: '#define';
-//PREPROC_UNDEF				: '#undef';
-//PREPROC_IFDEF				: '#ifdef';
-//PREPROC_IFNDEF			: '#ifndef';
-//PREPROC_ELSEIF			: '#elseif';
-//PREPROC_ENDIF				: '#endif';
-//PREPROC_LINE				: '#line';
-//PREPROC_IF				: '#if';
-//PREPROC_ELSE				: '#else';
+//PREPROCESSSOR             : '#' ~[\r\n]* -> channel(HIDDEN);
+PREPROC_INCLUDE_LOCAL   	: '#include' [ ]*? STRING_LITERAL -> channel(HIDDEN);
+PREPROC_INCLUDE_SYS         : '#include' [ ]*? '<' ~[\n|\r]+ '>' -> channel(HIDDEN);
+PREPROC_DEFINE			    : '#define ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_UNDEF		        : '#undef ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_IFDEF			    : '#ifdef ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_IFNDEF			    : '#ifndef ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_LINE			    : '#line ' [0-9]+ STRING_LITERAL [0-9]*? -> channel(HIDDEN);
+PREPROC_IF				    : '#if ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_ELSEIF			    : '#elseif ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_ENDIF			    : '#endif' -> channel(HIDDEN);
+PREPROC_ELSE				: '#else' -> channel(HIDDEN);
 
 IDENTIFIER					: [A-Za-z_][A-Za-z0-9_]*;
 TYPE_IDENTIFIER				: [A-Za-z_][A-Za-z0-9_]*;
 
 INTEGER						: HEX_INTEGER
-							| DEC_INTEGER
-							| OCT_INTEGER
-							| BI_INTEGER
-							| HEX_INTEGER_WITH
-							| DEC_INTEGER_WITH
-							| OCT_INTEGER_WITH
-							| BI_INTEGER_WITH ;
+                            | DEC_INTEGER
+                            | OCT_INTEGER
+                            | BI_INTEGER
+                            | HEX_INTEGER_WITH
+                            | DEC_INTEGER_WITH
+                            | OCT_INTEGER_WITH
+                            | BI_INTEGER_WITH ;
 
 fragment HEX_INTEGER 				: '0'[xX][0-9a-fA-F_]+ ;
 fragment DEC_INTEGER				: '0'[dD][0-9_]+ | [0-9][0-9_]* ;
