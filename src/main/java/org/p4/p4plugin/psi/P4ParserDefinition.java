@@ -66,10 +66,19 @@ public class P4ParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getCommentTokens() {
-        IElementType commentType = P4LangTokenType.getTokenElementType(P4Lexer.COMMENT);
-        IElementType lineCommentType = P4LangTokenType.getTokenElementType(P4Lexer.LINE_COMMENT);
-        IElementType preprocessorType = P4LangTokenType.getTokenElementType(P4Lexer.PREPROCESSSOR);
-        return TokenSet.create(commentType, lineCommentType, preprocessorType);
+        return TokenSet.create(P4LangTokenType.getTokenElementType(P4Lexer.COMMENT),
+                P4LangTokenType.getTokenElementType(P4Lexer.LINE_COMMENT),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_INCLUDE_LOCAL),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_INCLUDE_SYS),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_DEFINE),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_UNDEF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IFDEF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IFNDEF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_LINE),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELSEIF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ENDIF),
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELSE));
     }
 
     @Override
