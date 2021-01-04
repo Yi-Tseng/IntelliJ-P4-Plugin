@@ -93,6 +93,8 @@ public class P4SyntaxHighlighter extends SyntaxHighlighterBase {
             key = P4LANG_STRING;
         } else if (P4LangTokenType.getTokenElementType(P4Lexer.COMMENT).equals(tokenType)) {
             key = P4LANG_COMMENT;
+        } else if (P4LangTokenType.getTokenElementType(P4Lexer.LINE_COMMENT).equals(tokenType)) {
+            key = P4LANG_COMMENT;
         } else if (P4LangTokenType.getTokenElementType(P4Lexer.INTEGER).equals(tokenType)) {
             key = P4LANG_INTEGER;
         } else {
