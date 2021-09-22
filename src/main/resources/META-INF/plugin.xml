@@ -31,7 +31,8 @@
   <extensions defaultExtensionNs="com.intellij">
 
     <!-- Language support -->
-    <fileTypeFactory implementation="org.p4.p4plugin.P4LangFileType$Factory" />
+    <fileType name="P4 Language" implementationClass="org.p4.p4plugin.P4LangFileType"
+              fieldName="INSTANCE" language="P4Lang" extensions="p4"/>
     <lang.commenter language="P4Lang"
                     implementationClass="org.p4.p4plugin.P4Commenter" />
     <completion.contributor language="P4Lang" implementationClass="org.p4.p4plugin.completion.P4LangKeywordCompletionContributor"/>
