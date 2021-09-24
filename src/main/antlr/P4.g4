@@ -937,6 +937,7 @@ PREPROC_IFNDEF			    : '#ifndef ' ~[\n|\r]+ -> channel(HIDDEN);
 PREPROC_LINE			    : '#line ' [0-9]+ STRING_LITERAL [0-9]*? -> channel(HIDDEN);
 PREPROC_IF				    : '#if ' ~[\n|\r]+ -> channel(HIDDEN);
 PREPROC_ELSEIF			    : '#elseif ' ~[\n|\r]+ -> channel(HIDDEN);
+PREPROC_ELIF			    : '#elif ' ~[\n|\r]+ -> channel(HIDDEN);
 PREPROC_ENDIF			    : '#endif' -> channel(HIDDEN);
 PREPROC_ELSE				: '#else' -> channel(HIDDEN);
 
