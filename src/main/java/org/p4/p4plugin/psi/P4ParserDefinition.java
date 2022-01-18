@@ -76,7 +76,6 @@ public class P4ParserDefinition implements ParserDefinition {
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IFNDEF),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_LINE),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELSEIF),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELIF),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ENDIF),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELSE));

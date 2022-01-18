@@ -23,6 +23,19 @@
 typedef bit<9> port_t;
 typedef bit<16> next_hop_id_t;
 
+/*
+#elif defined(ABCDEFGHIJKLMNOPQRS)
+const bit<32> abc = 1;
+#endif
+*/
+
+#define  TEST(param1) \
+    state ctrl_##param1 { \
+}
+
+#define
+#define test=1
+
 const port_t CPU_PORT = 255;
 
 struct local_metadata_t {
