@@ -935,7 +935,7 @@ PREPROC_INCLUDE_SYS         : '#include' [ ]*? '<' ~[\n|\r]+ '>' -> channel(HIDD
 // The wise StackOverflow oracle suggested this:
 // https://stackoverflow.com/questions/48320194/antlr-parsing-multiline-define-for-c-g4
 //PREPROC_DEFINE              : '#' (~['\\'\r\n] | '\\' [ \t]* EOL )* -> channel(HIDDEN);
-PREPROC_DEFINE              : '#define ' (~[\\\r\n] | '\\' [\r]?'\n' | '\\'. )* -> channel(HIDDEN);
+PREPROC_DEFINE              : '#' (~[\\\r\n] | '\\' [\r]?'\n' | '\\'. )* -> channel(HIDDEN);
 //PREPROC_DEFINE              : '#define ' (~[\r\n])+ -> channel(HIDDEN);
 PREPROC_UNDEF		        : '#undef ' ~[\n|\r]+ -> channel(HIDDEN);
 PREPROC_IFDEF			    : '#ifdef ' ~[\n|\r]+ -> channel(HIDDEN);
