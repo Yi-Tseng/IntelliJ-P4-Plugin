@@ -924,22 +924,15 @@ WS 							: [ \t\r\n]+ -> channel(HIDDEN) ;
 COMMENT 					: '/*' .*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT 				: '//' ~[\r\n]* -> channel(HIDDEN) ;
 fragment ESCAPED_QUOTE 		: '\\"';
+fragment EOL                : '\r'? '\n';
 STRING_LITERAL 				: '"' ( ESCAPED_QUOTE | ~('\n'|'\r') )*? '"';
 
 // All preprocessor statements will be ignored in the lexer and the parser
-//PREPROCESSSOR             : '#' ~[\r\n]* -> channel(HIDDEN);
 PREPROC_INCLUDE_LOCAL   	: '#include' [ ]*? STRING_LITERAL -> channel(HIDDEN);
 PREPROC_INCLUDE_SYS         : '#include' [ ]*? '<' ~[\n|\r]+ '>' -> channel(HIDDEN);
-PREPROC_DEFINE			    : '#define ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_UNDEF		        : '#undef ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_IFDEF			    : '#ifdef ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_IFNDEF			    : '#ifndef ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_LINE			    : '#line ' [0-9]+ STRING_LITERAL [0-9]*? -> channel(HIDDEN);
-PREPROC_IF				    : '#if ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_ELSEIF			    : '#elseif ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_ELIF			    : '#elif ' ~[\n|\r]+ -> channel(HIDDEN);
-PREPROC_ENDIF			    : '#endif' -> channel(HIDDEN);
-PREPROC_ELSE				: '#else' -> channel(HIDDEN);
+// The wise StackOverflow oracle suggested this:
+// https://stackoverflow.com/questions/48320194/antlr-parsing-multiline-define-for-c-g4
+PREPROC_DEFINE              : '#' (~[\\\r\n] | '\\' [\r]?'\n' | '\\'. )* -> channel(HIDDEN);
 
 IDENTIFIER					: [A-Za-z_][A-Za-z0-9_]*;
 TYPE_IDENTIFIER				: [A-Za-z_][A-Za-z0-9_]*;
