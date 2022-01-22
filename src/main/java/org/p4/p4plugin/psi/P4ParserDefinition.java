@@ -70,15 +70,7 @@ public class P4ParserDefinition implements ParserDefinition {
                 P4LangTokenType.getTokenElementType(P4Lexer.LINE_COMMENT),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_INCLUDE_LOCAL),
                 P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_INCLUDE_SYS),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_DEFINE),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_UNDEF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IFDEF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IFNDEF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_LINE),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_IF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELIF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ENDIF),
-                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_ELSE));
+                P4LangTokenType.getTokenElementType(P4Lexer.PREPROC_DEFINE));
     }
 
     @Override
